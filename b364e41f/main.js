@@ -21,14 +21,26 @@ const { xhrBinary, base64ArrayBuffer } = require('./utils/network');
 //     // selection.insertionParent.addChild(shape);
 // }
 
+// TODO: Capture user input from plugin UI to set sportCode
+const sportCode = 'NFL'
+
+
 
 
 
 function myPluginCommand(selection) {
+    const idJSON = ((sport) => {
+        switch(sport) {
+            case 'NFL':
+                return 'https://sheetsu.com/apis/v1.0su/8c894eb7a43d';
+            default:
+                return null; 
+        }
+    })(sportCode);
+    console.log(idJSON)
 
     if (selection.items.length) {
-        const url = "https://sheetsu.com/apis/v1.0su/8c894eb7a43d";
-        return fetch(url)
+        return fetch(idJSON)
             .then(function (response) {
                 return response.json();
             })
@@ -44,10 +56,12 @@ function myPluginCommand(selection) {
 async function downloadImage(selection, jsonResponse) {
     try {
 
-        const photoUrl = jsonResponse[2].logo;
+        const photoUrl = jsonResponse[14].logo;
         const photoObj = await xhrBinary(photoUrl);
         const photoObjBase64 = await base64ArrayBuffer(photoObj);
         applyImagefill(selection, photoObjBase64);
+
+        console.log(photoUrl)
 
     } catch (err) {
         console.log("error")
