@@ -27,8 +27,9 @@ const sportCode = 'NFL'
 
 
 
-
+// Main function fires when user click on it in the Plugins menu.
 function myPluginCommand(selection) {
+    
     const idJSON = ((sport) => {
         switch(sport) {
             case 'NFL':
@@ -37,7 +38,6 @@ function myPluginCommand(selection) {
                 return null; 
         }
     })(sportCode);
-    console.log(idJSON)
 
     if (selection.items.length) {
         return fetch(idJSON)

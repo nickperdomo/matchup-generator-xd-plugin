@@ -1,0 +1,19 @@
+{
+  "name": "b364e41f",
+  "version": "1.0.0",
+  "description": "An Adobe XD plugin for generating sports matchup images.",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://nickperdomo@bitbucket.org/nickperdomo/xd-plugins.git"
+  },
+  "author": "Nick Perdomo",
+  "license": "ISC",
+  "homepage": "https://bitbucket.org/nickperdomo/xd-plugins#readme",
+  "dependencies": {
+    "@adobe/xd-plugin-toolkit": "0.0.1"
+  }
+}
