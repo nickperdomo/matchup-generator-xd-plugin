@@ -23,7 +23,7 @@ const sportCode = "NFL";
 
 // Main function fires when user click on it in the Plugins menu.
 function myPluginCommand(selection) {
-  setupDialog.showModal().then(result => {
+  return setupDialog.showModal().then(result => {
       const idJSON = (sport => {
         switch (sport) {
           case "NFL":
@@ -47,7 +47,7 @@ function myPluginCommand(selection) {
 
       async function downloadImage(selection, jsonResponse) {
         try {
-          const photoUrl = jsonResponse[4].logo;
+          const photoUrl = jsonResponse[19].logo;
           const photoObj = await xhrBinary(photoUrl);
           const photoObjBase64 = await base64ArrayBuffer(photoObj);
           applyImagefill(selection, photoObjBase64);

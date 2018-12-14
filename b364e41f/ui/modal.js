@@ -34,39 +34,30 @@ return element;
 let setupDialog =
     h("dialog",
         h("form", { method:"dialog", style: { width: 400 } },
-            h("h1", "Simple Form"),
+            h("h1", "Matchup Images Setup"),
             h("hr"),
-            h("p", "This plugin will vectorize your entire project. Are you sure you'd like to continue?"),
+            // h("p", "A note here."),
             h("label",
-                h("span", "Input Type Text"),
-                h("input")
-            ),
-            h("label",
-                h("span", "Text Area rows=6, Bug: Should be 6 rows high."),
-                h("textarea", { style: { height: 100 } } )
-            ),
-            h("label",
-                h("span", "Select"),
+                h("span", "Sport"),
                 h("select",
-                    ...["A","B","C","D","E","F","G"].map( name => h("option", `Option ${name}`) )
+                    ...["NBA","NCAA","NFL","NHL","MLB"].map( name => h("option", `${name}`) )
                 )
+            ),
+            h("label",
+                h("span", "Export List URL"),
+                h("input")
             ),
             h("label", { style: { flexDirection: "row", alignItems: "center" }},
                 h("input", { type: "checkbox" }),
-                h("span", "Input Type Checkbox?")
-            ),
-            h("label",
-                h("span", "Input Type Range"),
-                h("input", { type: "range" })
+                h("span", "Use Offline Logos")
             ),
             h("footer",
                 h("button", { uxpVariant: "primary", onclick(e) { setupDialog.close() } }, "Cancel"),
-                h("button", { uxpVariant: "cta", onclick(e) { setupDialog.close() } }, "Submit")
+                h("button", { uxpVariant: "cta", onclick(e) { setupDialog.close() } }, "Export Images")
             )
         )
     )
 document.body.appendChild(setupDialog);
-
 
 
 
