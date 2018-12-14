@@ -22,52 +22,64 @@ const { setupDialog } = require("./ui/modal");
 const sportCode = "NFL";
 
 // Main function fires when user click on it in the Plugins menu.
-function myPluginCommand(selection) {
-  return setupDialog.showModal().then(result => {
-      const idJSON = (sport => {
-        switch (sport) {
-          case "NFL":
-            return "https://sheetsu.com/apis/v1.0su/8c894eb7a43d";
-          default:
-            return null;
+function myPluginCommand(selection, documentRoot) {
+    return setupDialog.showModal().then(result => {
+
+        // let node = selection.items[0];
+        // console.log("The selected node is a: " + node.constructor.name);
+        let node = documentRoot;
+        // Print out types of all child nodes (if any)
+        node.children.forEach(function (childNode, i) {
+            console.log("Child " + i + " type: " + childNode.constructor.name);
+            console.log("Child " + i + " name: " + childNode.name);
+            console.log("Child " + i + " export: " + childNode.markedForExport);
+
+        });
+
+        const idJSON = (sport => {
+            switch (sport) {
+                case "NFL":
+                    return "https://sheetsu.com/apis/v1.0su/8c894eb7a43d";
+                default:
+                    return null;
+            }
+        })(sportCode);
+
+        if (selection.items.length) {
+            return fetch(idJSON)
+                .then(function (response) {
+                    return response.json();
+                })
+                .then(function (jsonResponse) {
+                    return downloadImage(selection, jsonResponse);
+                });
+        } else {
+            console.log("Please select a shape to apply the downloaded image.");
         }
-      })(sportCode);
 
-      if (selection.items.length) {
-        return fetch(idJSON)
-          .then(function(response) {
-            return response.json();
-          })
-          .then(function(jsonResponse) {
-            return downloadImage(selection, jsonResponse);
-          });
-      } else {
-        console.log("Please select a shape to apply the downloaded image.");
-      }
+        async function downloadImage(selection, jsonResponse) {
+            try {
+                const photoUrl = jsonResponse[19].logo;
+                const photoObj = await xhrBinary(photoUrl);
+                const photoObjBase64 = await base64ArrayBuffer(photoObj);
+                applyImagefill(selection, photoObjBase64);
 
-      async function downloadImage(selection, jsonResponse) {
-        try {
-          const photoUrl = jsonResponse[19].logo;
-          const photoObj = await xhrBinary(photoUrl);
-          const photoObjBase64 = await base64ArrayBuffer(photoObj);
-          applyImagefill(selection, photoObjBase64);
-
-          console.log(photoUrl);
-        } catch (err) {
-          console.log("error");
-          console.log(err.message);
+                console.log(photoUrl);
+            } catch (err) {
+                console.log("error");
+                console.log(err.message);
+            }
         }
-      }
     });
 
     function applyImagefill(selection, base64) {
-      const imageFill = new ImageFill(`data:image/png;base64,${base64}`);
-      selection.items[0].fill = imageFill;
+        const imageFill = new ImageFill(`data:image/png;base64,${base64}`);
+        selection.items[0].fill = imageFill;
     }
-}
+} //modal closing bracket
 
 module.exports = {
-  commands: {
-    myPluginCommand: myPluginCommand
-  }
+    commands: {
+        myPluginCommand: myPluginCommand
+    }
 };
