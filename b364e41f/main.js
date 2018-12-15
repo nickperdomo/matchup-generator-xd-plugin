@@ -21,20 +21,44 @@ const { setupDialog } = require("./ui/modal");
 // TODO: Capture user input from plugin UI to set sportCode
 const sportCode = "NFL";
 
-// Main function fires when user click on it in the Plugins menu.
+// The main function fires when a user clicks the menu item in Plugins.
 function myPluginCommand(selection, documentRoot) {
     return setupDialog.showModal().then(result => {
-
+        let docNode = documentRoot;
         // let node = selection.items[0];
         // console.log("The selected node is a: " + node.constructor.name);
-        let node = documentRoot;
-        // Print out types of all child nodes (if any)
-        node.children.forEach(function (childNode, i) {
-            console.log("Child " + i + " type: " + childNode.constructor.name);
-            console.log("Child " + i + " name: " + childNode.name);
-            console.log("Child " + i + " export: " + childNode.markedForExport);
+        
+        // Capture renditions(exportable assets) and team logo containers
+        const renditions = docNode.children.filter(child => child.markedForExport);
+        const homeLogoConts = 
+            renditions.map(rendition => 
+                rendition.children.filter(child => 
+                    child.name === 'homeLogoCont'
+                )[0]
+            );
+        const awayLogoConts = 
+            renditions.map(rendition => 
+                rendition.children.filter(child => 
+                    child.name === 'awayLogoCont'
+                )[0]
+            );
+        console.log(awayLogoConts);
 
-        });
+        homeLogoConts.forEach(container =>
+            // TODO define homeLogo
+            container.fill = homeLogo
+        );
+
+        
+
+
+        // node.children.forEach(function (childNode, i) {
+        //     console.log("Child " + i + " type: " + childNode.constructor.name);
+        //     console.log("Child " + i + " name: " + childNode.name);
+        //     console.log("Child " + i + " export: " + childNode.markedForExport);
+
+        // });
+        
 
         const idJSON = (sport => {
             switch (sport) {
