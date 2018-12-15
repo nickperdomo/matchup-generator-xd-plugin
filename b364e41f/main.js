@@ -44,10 +44,10 @@ function myPluginCommand(selection, documentRoot) {
             );
         console.log(awayLogoConts);
 
-        homeLogoConts.forEach(container =>
-            // TODO define homeLogo
-            container.fill = homeLogo
-        );
+        // homeLogoConts.forEach(container =>
+        //     // TODO define homeLogo
+        //     container.fill = homeLogo
+        // );
 
         
 
@@ -69,37 +69,42 @@ function myPluginCommand(selection, documentRoot) {
             }
         })(sportCode);
 
-        if (selection.items.length) {
-            return fetch(idJSON)
-                .then(function (response) {
-                    return response.json();
-                })
-                .then(function (jsonResponse) {
-                    return downloadImage(selection, jsonResponse);
-                });
-        } else {
-            console.log("Please select a shape to apply the downloaded image.");
-        }
+        // if (selection.items.length) {
+        return fetch(idJSON)
+            .then(function (response) {
+                return response.json();
+            })
+            .then(function (jsonResponse) {
+                return downloadImage(homeLogoConts, jsonResponse);
+            });
+        // } else {
+        //     console.log("Please select a shape to apply the downloaded image.");
+        // }
 
-        async function downloadImage(selection, jsonResponse) {
+        async function downloadImage(logoConts, jsonResponse) {
             try {
                 const photoUrl = jsonResponse[19].logo;
                 const photoObj = await xhrBinary(photoUrl);
                 const photoObjBase64 = await base64ArrayBuffer(photoObj);
-                applyImagefill(selection, photoObjBase64);
+                applyImagefill(logoConts, photoObjBase64);
 
                 console.log(photoUrl);
+
             } catch (err) {
                 console.log("error");
                 console.log(err.message);
             }
         }
+    
+        function applyImagefill(logoConts, base64) {
+            const imageFill = new ImageFill(`data:image/png;base64,${base64}`);
+            // selection.items[0].fill = imageFill;
+            logoConts.forEach(container =>
+                // TODO define homeLogo
+                container.fill = imageFill
+            );
+        }
     });
-
-    function applyImagefill(selection, base64) {
-        const imageFill = new ImageFill(`data:image/png;base64,${base64}`);
-        selection.items[0].fill = imageFill;
-    }
 } //modal closing bracket
 
 module.exports = {
