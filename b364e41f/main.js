@@ -1,7 +1,8 @@
 /* Created by Nick Perdomo
  * Questions, praise, hate? Email: nickperdomo121@gmail.com
  */
-
+const application = require("application");
+const fs = require("uxp").storage.localFileSystem;
 const { Rectangle, Color, ImageFill } = require("scenegraph");
 const { xhrBinary, base64ArrayBuffer } = require("./utils/network");
 const { setupDialog } = require("./ui/modal");
@@ -28,29 +29,22 @@ function myPluginCommand(selection, documentRoot) {
         // let node = selection.items[0];
         // console.log("The selected node is a: " + node.constructor.name);
         
-        // Capture renditions(exportable assets) and team logo containers
-        const renditions = docNode.children.filter(child => child.markedForExport);
+        // Capture exportableAssets(exportable assets) and team logo containers
+        const exportableAssets = docNode.children.filter(child => child.markedForExport);
         const homeLogoConts = 
-            renditions.map(rendition => 
+            exportableAssets.map(rendition => 
                 rendition.children.filter(child => 
                     child.name === 'homeLogoCont'
                 )[0]
             );
         const awayLogoConts = 
-            renditions.map(rendition => 
+            exportableAssets.map(rendition => 
                 rendition.children.filter(child => 
                     child.name === 'awayLogoCont'
                 )[0]
             );
-        console.log(awayLogoConts);
-
-        // homeLogoConts.forEach(container =>
-        //     // TODO define homeLogo
-        //     container.fill = homeLogo
-        // );
-
-        
-
+   
+        // console.log(awayLogoConts);
 
         // node.children.forEach(function (childNode, i) {
         //     console.log("Child " + i + " type: " + childNode.constructor.name);
@@ -58,8 +52,9 @@ function myPluginCommand(selection, documentRoot) {
         //     console.log("Child " + i + " export: " + childNode.markedForExport);
 
         // });
-        
 
+        // TODO: Remove sport selector and pull all required data from JSON
+        // which should include logo urls and tricodes for file names
         const idJSON = (sport => {
             switch (sport) {
                 case "NFL":
@@ -69,26 +64,43 @@ function myPluginCommand(selection, documentRoot) {
             }
         })(sportCode);
 
-        // if (selection.items.length) {
+        // return statement of plugin handler
         return fetch(idJSON)
             .then(function (response) {
                 return response.json();
             })
             .then(function (jsonResponse) {
-                return downloadImage(homeLogoConts, jsonResponse);
+                return (
+                    downloadImage(homeLogoConts, jsonResponse),
+                    downloadImage(awayLogoConts, jsonResponse)
+                );
+            })
+            .then( function () {
+                return exportRenditions(exportableAssets); 
             });
-        // } else {
-        //     console.log("Please select a shape to apply the downloaded image.");
-        // }
+        
+
+
+        async function exportRenditions(exportableAssets) {
+            try {
+                if (exportableAssets.length > 0) {
+                    const folder = await fs.getFolder();
+                    const file = await folder.createFile("rendition.png");
+                }
+            } catch (err) {
+                console.log("error");
+                console.log(err.message);
+            }
+        } 
 
         async function downloadImage(logoConts, jsonResponse) {
             try {
-                const photoUrl = jsonResponse[19].logo;
-                const photoObj = await xhrBinary(photoUrl);
-                const photoObjBase64 = await base64ArrayBuffer(photoObj);
-                applyImagefill(logoConts, photoObjBase64);
+                const logoUrl = jsonResponse[19].logo;
+                const logoObj = await xhrBinary(logoUrl);
+                const logoObjBase64 = await base64ArrayBuffer(logoObj);
+                applyImagefill(logoConts, logoObjBase64);
 
-                console.log(photoUrl);
+                console.log(logoUrl);
 
             } catch (err) {
                 console.log("error");
@@ -98,9 +110,7 @@ function myPluginCommand(selection, documentRoot) {
     
         function applyImagefill(logoConts, base64) {
             const imageFill = new ImageFill(`data:image/png;base64,${base64}`);
-            // selection.items[0].fill = imageFill;
             logoConts.forEach(container =>
-                // TODO define homeLogo
                 container.fill = imageFill
             );
         }
