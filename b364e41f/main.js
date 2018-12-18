@@ -55,14 +55,7 @@ function myPluginCommand(selection, documentRoot) {
 
         // TODO: Remove sport selector and pull all required data from JSON
         // which should include logo urls and tricodes for file names
-        const idJSON = (sport => {
-            switch (sport) {
-                case "NFL":
-                    return "https://sheetsu.com/apis/v1.0su/8c894eb7a43d";
-                default:
-                    return null;
-            }
-        })(sportCode);
+        const idJSON = 'https://sheetsu.com/apis/v1.0su/8c894eb7a43d/sheets/exportList';
 
         // return statement of plugin handler
         return fetch(idJSON)
@@ -71,8 +64,9 @@ function myPluginCommand(selection, documentRoot) {
             })
             .then(function (jsonResponse) {
                 return (
-                    downloadImage(homeLogoConts, jsonResponse),
-                    downloadImage(awayLogoConts, jsonResponse)
+                    console.log(jsonResponse),
+                    downloadImage(homeLogoConts, jsonResponse, "home"),
+                    downloadImage(awayLogoConts, jsonResponse, "away")
                 );
             })
             .then( function () {
@@ -112,9 +106,19 @@ function myPluginCommand(selection, documentRoot) {
             }
         } 
 
-        async function downloadImage(logoConts, jsonResponse) {
+        async function downloadImage(logoConts, jsonResponse, team) {
             try {
-                const logoUrl = jsonResponse[19].logo;
+                const logoSide = (team => {
+                    switch (team) {
+                        case "home":
+                            return "homeTeamLogoURL";
+                        case "away":
+                            return "awayTeamLogoURL";  
+                        default:
+                            return null;
+                    }
+                })(team);
+                const logoUrl = jsonResponse[0][logoSide];
                 const logoObj = await xhrBinary(logoUrl);
                 const logoObjBase64 = await base64ArrayBuffer(logoObj);
                 applyImagefill(logoConts, logoObjBase64);
