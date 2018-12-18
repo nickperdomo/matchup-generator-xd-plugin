@@ -32,15 +32,15 @@ function myPluginCommand(selection, documentRoot) {
         // Capture exportableAssets(exportable assets) and team logo containers
         const exportableAssets = docNode.children.filter(child => child.markedForExport);
         const homeLogoConts = 
-            exportableAssets.map(rendition => 
-                rendition.children.filter(child => 
-                    child.name === 'homeLogoCont'
+            exportableAssets.map(asset => 
+                asset.children.filter(child => 
+                    child.name === 'homeLogoContainer'
                 )[0]
             );
         const awayLogoConts = 
-            exportableAssets.map(rendition => 
-                rendition.children.filter(child => 
-                    child.name === 'awayLogoCont'
+            exportableAssets.map(asset => 
+                asset.children.filter(child => 
+                    child.name === 'awayLogoContainer'
                 )[0]
             );
    
@@ -85,7 +85,26 @@ function myPluginCommand(selection, documentRoot) {
             try {
                 if (exportableAssets.length > 0) {
                     const folder = await fs.getFolder();
-                    const file = await folder.createFile("rendition.png");
+                    const arr = await exportableAssets.map(async asset => {		
+                        const file = await folder.createFile(`${asset.name}.png`, {overwrite: true});
+                        let obj = {
+                            node: asset,               
+                            outputFile: file,                    
+                            type: application.RenditionType.PNG,    
+                            scale: 2   
+                        }
+                        return obj
+                    });
+                    const renditions = await Promise.all(arr);
+     
+                    await application.createRenditions(renditions)    
+                        .then(results => {                             
+                            console.log(`Renditions have been saved at ${results[0].outputFile.nativePath}`);
+                        })
+                        .catch(error => {                             
+                            console.log(error);
+                        });
+
                 }
             } catch (err) {
                 console.log("error");
