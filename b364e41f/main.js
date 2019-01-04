@@ -11,7 +11,7 @@ const { setupDialog } = require("./ui/modal");
 const sportCode = "NFL";
 
 // The main function fires when a user clicks the menu item in Plugins.
-function myPluginCommand(selection, documentRoot) {
+async function myPluginCommand(selection, documentRoot) {
     // return statement of plugin handler
     return setupDialog.showModal()
     .then((result) => {
@@ -41,7 +41,10 @@ function myPluginCommand(selection, documentRoot) {
         fetch(sheetsuEndpoint)
             .then( response => response.json() )
             .then( jsonResponse => {
-                console.log(jsonResponse);
+                return (
+                    console.log(jsonResponse),
+                    downloadImage(homeLogoConts, jsonResponse, "home")
+                )
             })
             .catch( reason => console.log(`Failure Reason: ${reason}`) );
                 
@@ -99,37 +102,37 @@ function myPluginCommand(selection, documentRoot) {
     //         }
     //     } 
 
-    //     async function downloadImage(logoConts, jsonResponse, team) {
-    //         try {
-    //             const logoSide = (team => {
-    //                 switch (team) {
-    //                     case "home":
-    //                         return "homeTeamLogoURL";
-    //                     case "away":
-    //                         return "awayTeamLogoURL";  
-    //                     default:
-    //                         return null;
-    //                 }
-    //             })(team);
-    //             const logoUrl = jsonResponse[0][logoSide];
-    //             const logoObj = await xhrBinary(logoUrl);
-    //             const logoObjBase64 = await base64ArrayBuffer(logoObj);
-    //             applyImagefill(logoConts, logoObjBase64);
+        async function downloadImage(logoConts, jsonResponse, team) {
+            try {
+                const logoSide = (team => {
+                    switch (team) {
+                        case "home":
+                            return "homeTeamLogoURL";
+                        case "away":
+                            return "awayTeamLogoURL";  
+                        default:
+                            return null;
+                    }
+                })(team);
+                const logoUrl = jsonResponse[0][logoSide];
+                const logoObj = await xhrBinary(logoUrl);
+                const logoObjBase64 = await base64ArrayBuffer(logoObj);
+                applyImagefill(logoConts, logoObjBase64);
 
-    //             console.log(logoUrl);
+                console.log(logoUrl);
 
-    //         } catch (err) {
-    //             console.log("error");
-    //             console.log(err.message);
-    //         }
-    //     }
+            } catch (err) {
+                console.log("error");
+                console.log(err.message);
+            }
+        }
     
-    //     function applyImagefill(logoConts, base64) {
-    //         const imageFill = new ImageFill(`data:image/png;base64,${base64}`);
-    //         logoConts.forEach(container =>
-    //             container.fill = imageFill
-    //         );
-    //     }
+        async function applyImagefill(logoConts, base64) {
+            const imageFill = new ImageFill(`data:image/png;base64,${base64}`);
+            logoConts.forEach(container =>
+                container.fill = imageFill
+            );
+        }
 
 } //modal closing bracket
 
