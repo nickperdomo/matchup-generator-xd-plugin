@@ -31,18 +31,15 @@ function myPluginCommand(selection, documentRoot) {
         
         // Capture exportableAssets(exportable assets) and team logo containers
         const exportableAssets = docNode.children.filter(child => child.markedForExport);
-        const homeLogoConts = 
-            exportableAssets.map(asset => 
-                asset.children.filter(child => 
-                    child.name === 'homeLogoContainer'
-                )[0]
-            );
-        const awayLogoConts = 
-            exportableAssets.map(asset => 
-                asset.children.filter(child => 
-                    child.name === 'awayLogoContainer'
-                )[0]
-            );
+        const homeLogoConts = [],
+              awayLogoConts = [];
+
+        exportableAssets.forEach( asset => {
+            homeLogoConts.push( asset.children.filter(child => child.name === 'homeLogoContainer')[0] )
+            awayLogoConts.push( asset.children.filter(child => child.name === 'awayLogoContainer')[0] )
+        });
+        console.log("Home: ", homeLogoConts);
+        console.log("Away: ", awayLogoConts);  
 
         // node.children.forEach(function (childNode, i) {
         //     console.log("Child " + i + " type: " + childNode.constructor.name);
