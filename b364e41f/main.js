@@ -57,7 +57,8 @@ function myPluginCommand(selection, documentRoot) {
             .then( response => response.json() )
             .then( jsonResponse => {
                 console.log(jsonResponse);
-            });
+            })
+            .catch( reason => console.log(`Failure Reason: ${reason}`) );
                 
         //         let dataset = {
         //             jsonResponse: jsonResponse,
@@ -67,9 +68,7 @@ function myPluginCommand(selection, documentRoot) {
         //         }        
         //         return dataset;
         //     })
-        //     .catch( (reason) => {
-        //         return console.log(`Reason: ${reason}`)
-        //     })
+        //     
         })    
     // .then( (resolvedValue) => {
     //     return (
