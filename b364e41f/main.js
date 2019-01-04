@@ -7,18 +7,6 @@ const { Rectangle, Color, ImageFill } = require("scenegraph");
 const { xhrBinary, base64ArrayBuffer } = require("./utils/network");
 const { setupDialog } = require("./ui/modal");
 
-// function myPluginCommand(selection) {
-//     // Go to Plugins > Development > Developer Console to see this log output
-//     console.log("Plugin command is running!");
-
-//     // Insert a red square at (0, 0) in the current artboard or group/container
-//     var shape = new Rectangle();
-//     shape.width = 100;
-//     shape.height = 100;
-//     shape.fill = new Color("lime");
-//     // selection.insertionParent.addChild(shape);
-// }
-
 // TODO: Capture user input from plugin UI to set sportCode
 const sportCode = "NFL";
 
@@ -27,7 +15,7 @@ function myPluginCommand(selection, documentRoot) {
     // return statement of plugin handler
     return setupDialog.showModal()
     .then((result) => {
-        let docNode = documentRoot;
+        const docNode = documentRoot;
         
         // Capture exportableAssets(exportable assets) and team logo containers
         const exportableAssets = docNode.children.filter(child => child.markedForExport);
@@ -38,8 +26,8 @@ function myPluginCommand(selection, documentRoot) {
             homeLogoConts.push( asset.children.filter(child => child.name === 'homeLogoContainer')[0] )
             awayLogoConts.push( asset.children.filter(child => child.name === 'awayLogoContainer')[0] )
         });
-        console.log("Home: ", homeLogoConts);
-        console.log("Away: ", awayLogoConts);  
+        // console.log("Home: ", homeLogoConts);
+        // console.log("Away: ", awayLogoConts);  
 
         // node.children.forEach(function (childNode, i) {
         //     console.log("Child " + i + " type: " + childNode.constructor.name);
