@@ -34,15 +34,10 @@ async function myPluginCommand() {
             return fetchJSON(sheetsuEndpoint)
                 .then( data => {
                     return (
-                        
-                        downloadImage(homeLogoConts, data, "home", 1),
-                        downloadImage(awayLogoConts, data, "away", 1)
+                        exportMatchups(data, 2, homeLogoConts, awayLogoConts, exportableAssets)
                     )
                 })
                 .catch( error => console.log(`Error fetching JSON: ${error}`) )
-                // .then( function () {
-                //     return exportRenditions(exportableAssets); 
-                // });
    
         }) // modal end
 } // plugin command end
@@ -80,12 +75,16 @@ async function applyImagefill(logoConts, base64) {
     );
 }
 
-async function exportRenditions(exportableAssets) {
+async function exportRenditions(data, matchupIndex, exportableAssets) {
     try {
         if (exportableAssets.length > 0) {
             const folder = await fs.getFolder();
-            const arr = await exportableAssets.map(async asset => {		
-                const file = await folder.createFile(`${asset.name}.png`, {overwrite: true});
+            const arr = await exportableAssets.map(async asset => {	
+                let fileName = 	`${data[matchupIndex].matchupName}_${asset.name}.png`;
+                const file = await folder.createFile(
+                    fileName,
+                    {overwrite: true}
+                );
                 let obj = {
                     node: asset,               
                     outputFile: file,                    
@@ -111,11 +110,20 @@ async function exportRenditions(exportableAssets) {
     }
 } 
 
-async function exportMatchups(exportableAssets) {
-    const renditionSets = await data.map(async matchup => {	
-        
-    });
+async function exportMatchups(data, matchupIndex, homeLogoConts, awayLogoConts, exportableAssets) {
+    // await data.forEach( async (matchup, matchupIndex) => {	
+        // console.log(`Matchup: ${matchup.matchupName}, Index: ${matchupIndex}` )
+    let logos = [
+        downloadImage(homeLogoConts, data, "home", matchupIndex),
+        downloadImage(awayLogoConts, data, "away", matchupIndex)
+    ]
+    // Wait until all logos in the current matchup have been downloaded and applied
+    return Promise.all(logos)
+        .then( values => {
+            return exportRenditions(data, matchupIndex, exportableAssets); 
+        })
 }
+ 
 
 async function fetchJSON (endpoint) {
     const response = await fetch(endpoint);
