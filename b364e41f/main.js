@@ -34,7 +34,10 @@ async function myPluginCommand() {
             return fetchJSON(sheetsuEndpoint)
                 .then( data => {
                     return (
-                        exportMatchups(data, 2, homeLogoConts, awayLogoConts, exportableAssets)
+                        data.forEach( async (matchup, matchupIndex) => {	
+                            // console.log(`Matchup: ${matchup.matchupName}, Index: ${matchupIndex}` )
+                            return exportMatchups(data, matchupIndex, homeLogoConts, awayLogoConts, exportableAssets)
+                        })
                     )
                 })
                 .catch( error => console.log(`Error fetching JSON: ${error}`) )
