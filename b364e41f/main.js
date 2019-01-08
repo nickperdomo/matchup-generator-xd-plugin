@@ -34,28 +34,22 @@ async function myPluginCommand() {
             return fetchJSON(sheetsuEndpoint)
                 .then( data => {
                     return (
-                           downloadImage(homeLogoConts, data, "home"),
-                           downloadImage(awayLogoConts, data, "away")
+                        
+                        downloadImage(homeLogoConts, data, "home", 1),
+                        downloadImage(awayLogoConts, data, "away", 1)
                     )
                 })
                 .catch( error => console.log(`Error fetching JSON: ${error}`) )
-                .then( function () {
-                    return exportRenditions(exportableAssets); 
-                });
-
-        // .then( function () {
-        //     return exportRenditions(exportableAssets); 
-        // });
-        
-
-
-        //     
+                // .then( function () {
+                //     return exportRenditions(exportableAssets); 
+                // });
+   
         }) // modal end
 } // plugin command end
     
 
 
-async function downloadImage(logoConts, jsonResponse, team) {
+async function downloadImage(logoConts, jsonResponse, team, matchupIndex) {
     try {
         const logoSide = (team => {
             switch (team) {
@@ -68,7 +62,7 @@ async function downloadImage(logoConts, jsonResponse, team) {
             }
         })(team);
     
-        const logoUrl = jsonResponse[0][logoSide];
+        const logoUrl = jsonResponse[matchupIndex][logoSide];
         const logoObj = await xhrBinary(logoUrl);
         const logoObjBase64 = await base64ArrayBuffer(logoObj);
         applyImagefill(logoConts, logoObjBase64);
@@ -117,7 +111,11 @@ async function exportRenditions(exportableAssets) {
     }
 } 
 
-
+async function exportMatchups(exportableAssets) {
+    const renditionSets = await data.map(async matchup => {	
+        
+    });
+}
 
 async function fetchJSON (endpoint) {
     const response = await fetch(endpoint);
