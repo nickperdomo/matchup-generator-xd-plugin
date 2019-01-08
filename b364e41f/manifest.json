@@ -2,7 +2,7 @@
   "name" : "Matchup Generator",
   "host" : {
     "app" : "XD",
-    "minVersion" : "13.0.0"
+    "minVersion" : "14.0.0"
   },
   "description" : "Sample plugin for Adobe XD, providing starter project scaffolding.",
   "id" : "b364e41f",
