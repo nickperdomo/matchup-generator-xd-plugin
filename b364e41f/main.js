@@ -39,50 +39,17 @@ async function myPluginCommand() {
                     )
                 })
                 .catch( error => console.log(`Error fetching JSON: ${error}`) )
+                .then( function () {
+                    return exportRenditions(exportableAssets); 
+                });
 
-        // .then( (resolvedValue) => {
-        //     return (
-        //         console.log(resolvedValue)
-        //         // downloadImage(resolvedValue.homeLogoConts, resolvedValue.jsonResponse, "home"),
-        //         // downloadImage(resolvedValue.awayLogoConts, resolvedValue.jsonResponse, "away")
-        //     );
-        // })
         // .then( function () {
         //     return exportRenditions(exportableAssets); 
         // });
         
 
 
-        //     async function exportRenditions(exportableAssets) {
-        //         try {
-        //             if (exportableAssets.length > 0) {
-        //                 const folder = await fs.getFolder();
-        //                 const arr = await exportableAssets.map(async asset => {		
-        //                     const file = await folder.createFile(`${asset.name}.png`, {overwrite: true});
-        //                     let obj = {
-        //                         node: asset,               
-        //                         outputFile: file,                    
-        //                         type: application.RenditionType.PNG,    
-        //                         scale: 2   
-        //                     }
-        //                     return obj
-        //                 });
-        //                 const renditions = await Promise.all(arr);
-        
-        //                 await application.createRenditions(renditions)    
-        //                     .then(results => {                             
-        //                         console.log(`Renditions have been saved at ${results[0].outputFile.nativePath}`);
-        //                     })
-        //                     .catch(error => {                             
-        //                         console.log(error);
-        //                     });
-
-        //             }
-        //         } catch (err) {
-        //             console.log("error");
-        //             console.log(err.message);
-        //         }
-        //     } 
+        //     
         }) // modal end
 } // plugin command end
     
@@ -118,6 +85,39 @@ async function applyImagefill(logoConts, base64) {
         container.fill = imageFill
     );
 }
+
+async function exportRenditions(exportableAssets) {
+    try {
+        if (exportableAssets.length > 0) {
+            const folder = await fs.getFolder();
+            const arr = await exportableAssets.map(async asset => {		
+                const file = await folder.createFile(`${asset.name}.png`, {overwrite: true});
+                let obj = {
+                    node: asset,               
+                    outputFile: file,                    
+                    type: application.RenditionType.PNG,    
+                    scale: 2   
+                }
+                return obj
+            });
+            const renditions = await Promise.all(arr);
+
+            await application.createRenditions(renditions)    
+                .then(results => {                             
+                    console.log(`Renditions have been saved at ${results[0].outputFile.nativePath}`);
+                })
+                .catch(error => {                             
+                    console.log(error);
+                });
+
+        }
+    } catch (err) {
+        console.log("error");
+        console.log(err.message);
+    }
+} 
+
+
 
 async function fetchJSON (endpoint) {
     const response = await fetch(endpoint);
