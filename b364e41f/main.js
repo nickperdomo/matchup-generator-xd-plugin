@@ -5,18 +5,21 @@ const application = require("application");
 const fs = require("uxp").storage.localFileSystem;
 const { Rectangle, Color, ImageFill } = require("scenegraph");
 const { xhrBinary, base64ArrayBuffer } = require("./utils/network");
-const { setupDialog } = require("./ui/modal");
+const { showSetupDialog } = require("./ui/modal");
 
-// TODO: Capture user input from plugin UI to set sportCode
-const sportCode = "NFL";
 
 // The main function fires when a user clicks the menu item in Plugins.
 async function myPluginCommand() {
     const { root } = require("scenegraph");
-    // return statement of plugin handler
-    return setupDialog.showModal()
-        .then( (result) => {
-              
+    // return statement of plugin handler (MUST BE A PROMISE!)
+    return showSetupDialog()
+        .then( result => {
+            // Capture setup dialog entries
+           const dialogEntries = {
+               json: result['sheetsuEndpoint'],
+               folder: result['outputFolder']
+           }
+
             // Capture exportableAssets(exportable assets) and team logo containers
             const exportableAssets = root.children.filter(child => child.markedForExport);
             const homeLogoConts = [],
@@ -30,7 +33,8 @@ async function myPluginCommand() {
             // console.log("Away: ", awayLogoConts);  
 
             // Download matchup data JSON
-            const sheetsuEndpoint = 'https://sheetsu.com/apis/v1.0su/8c894eb7a43d/sheets/exportList';
+            // const sheetsuEndpoint = 'https://sheetsu.com/apis/v1.0su/8c894eb7a43d/sheets/exportList';
+            const sheetsuEndpoint = dialogEntries.json;
             return fetchJSON(sheetsuEndpoint)
                 .then( async function (data) {
                     let queue = data.map( function (matchup, matchupIndex) {
@@ -39,17 +43,14 @@ async function myPluginCommand() {
                     })
                     const startQueue = Promise.all(queue);
                     
-                    return startQueue;
-                    
-                        
-                            // console.log(`Matchup: ${matchup.matchupName}, Index: ${matchupIndex}` )
-                        //     return exportMatchups(data, matchupIndex, homeLogoConts, awayLogoConts, exportableAssets)
-                        // )
-                    
+                    return startQueue;                 
                 })
                 .catch( error => console.log(`Error fetching JSON: ${error}`) )
    
-        }) // modal end
+        })
+        // .catch( reason => {
+        //     console.log(`Error with setup dialog: ${reason}`)
+        // }) // modal end
 } // plugin command end
     
 
@@ -98,6 +99,7 @@ async function exportRenditions(data, matchupIndex, homeLogoConts, awayLogoConts
                     fileName,
                     {overwrite: true}
                 );
+
                 let obj = {
                     node: asset,               
                     outputFile: file,                    
@@ -123,6 +125,7 @@ async function exportRenditions(data, matchupIndex, homeLogoConts, awayLogoConts
     }
 } 
 
+
 async function exportMatchups(data, matchupIndex, homeLogoConts, awayLogoConts, exportableAssets) {
     return exportRenditions(data, matchupIndex, homeLogoConts, awayLogoConts, exportableAssets); 
 }
@@ -136,6 +139,8 @@ async function fetchJSON (endpoint) {
     const data = await response.json();
     return data;
 }
+
+
 
 module.exports = {
     commands: {

@@ -1,66 +1,46 @@
-/**
-* Shorthand for creating Elements.
-* @param {*} tag The tag name of the element.
-* @param {*} [props] Optional props.
-* @param {*} children Child elements or strings
-*/
-function h(tag, props, ...children) {
-let element = document.createElement(tag);
-if (props) {
-    if (props.nodeType || typeof props !== "object") {
-        children.unshift(props);
-    }
-    else {
-        for (let name in props) {
-            let value = props[name];
-            if (name == "style") {
-                Object.assign(element.style, value);
-            }
-            else {
-                element.setAttribute(name, value);
-                element[name] = value;
-            }
-        }
-    }
-}
-for (let child of children) {
-    element.appendChild(typeof child === "object" ? child : document.createTextNode(child));
-}
-return element;
-}
+// const { root } = require("scenegraph");
+const DialogHelper = require('../utils/dialog-helper');
 
-/* Setup Dialog Modal
- ***************************************/ 
-let setupDialog =
-    h("dialog",
-        h("form", { method:"dialog", style: { width: 400 } },
-            h("h1", "Matchup Images Setup"),
-            h("hr"),
-            // h("p", "A note here."),
-            h("label",
-                h("span", "Sport"),
-                h("select",
-                    ...["NBA","NCAA","NFL","NHL","MLB"].map( name => h("option", `${name}`) )
-                )
-            ),
-            h("label",
-                h("span", "Export List URL"),
-                h("input")
-            ),
-            h("label", { style: { flexDirection: "row", alignItems: "center" }},
-                h("input", { type: "checkbox" }),
-                h("span", "Use Offline Logos")
-            ),
-            h("footer",
-                h("button", { uxpVariant: "primary", onclick(e) { setupDialog.close() } }, "Cancel"),
-                h("button", { uxpVariant: "cta", onclick(e) { setupDialog.close() } }, "Export Images")
-            )
-        )
-    )
-document.body.appendChild(setupDialog);
-
-
+async function showSetupDialog() {
+    try {
+        const result = await DialogHelper.showDialog('setup-dialog', 'Matchup Image Generator', 
+        // Dialog contents
+        [
+            {
+                type: DialogHelper.HR,
+                id: 'titleHR'
+            },
+            // {
+            //     type: DialogHelper.TEXT,
+            //     id: 'explanation',
+            //     label: 'Just enter the text you want to replace and the one you want to replace it with and hit the "Replace text" button below.'
+            // },
+            {   
+                type: DialogHelper.TEXT_INPUT,
+                id: 'sheetsuEndpoint',
+                label: 'Sheetsu URL'
+            },
+            {
+                type: DialogHelper.TEXT_INPUT,
+                id: 'outputFolder',
+                label: 'Output Folder'
+            },
+        ],
+        // Dialog options
+        {
+            okButtonText: 'Export Images',
+            cancelButtonText: 'Cancel'
+        });
+        return result;
+        // now, result is the object containing all the values
+        // await someExampleAsynchronousFunction();
+        // selection.items[0].text = selection.items[0].text.split(results.match).join(results.replace); // Replace all isntances of results.match with results.replace in the first selected layer
+    } catch (e) {
+        return console.log(e);
+        // The dialog got canceled by the user.
+    }    
+}
 
 module.exports = {
-    setupDialog: setupDialog, 
+    showSetupDialog: showSetupDialog, 
 };
