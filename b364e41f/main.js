@@ -94,7 +94,7 @@ async function exportRenditions(data, matchupIndex, homeLogoConts, awayLogoConts
                 downloadImage(homeLogoConts, data, "home", matchupIndex);
                 downloadImage(awayLogoConts, data, "away", matchupIndex);
 
-                let fileName = `${data[matchupIndex].matchupName}_${asset.name}.png`;
+                let fileName = `${data[matchupIndex].matchupName}_${asset.name}.jpg`;
                 const file = await folder.createFile(
                     fileName,
                     {overwrite: true}
@@ -103,8 +103,9 @@ async function exportRenditions(data, matchupIndex, homeLogoConts, awayLogoConts
                 let obj = {
                     node: asset,               
                     outputFile: file,                    
-                    type: application.RenditionType.PNG,    
-                    scale: 2   
+                    type: application.RenditionType.JPG,
+                    quality: 90,    
+                    scale: 2
                 }
                 return obj
             });
