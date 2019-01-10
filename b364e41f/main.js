@@ -13,13 +13,15 @@ async function myPluginCommand() {
     const { root } = require("scenegraph");
     // return statement of plugin handler (MUST BE A PROMISE!)
     return showSetupDialog()
-        .then( result => {
+        .then( async function (result) {
             // Capture setup dialog entries
            const dialogEntries = {
                json: result['sheetsuEndpoint'],
-               folder: result['outputFolder']
            }
 
+           // Ask user to pick an output folder
+           const exportFolder = await fs.getFolder();
+           
             // Capture exportableAssets(exportable assets) and team logo containers
             const exportableAssets = root.children.filter(child => child.markedForExport);
             const homeLogoConts = [],
@@ -33,17 +35,15 @@ async function myPluginCommand() {
             // console.log("Away: ", awayLogoConts);  
 
             // Download matchup data JSON
-            // const sheetsuEndpoint = 'https://sheetsu.com/apis/v1.0su/8c894eb7a43d/sheets/exportList';
-            const sheetsuEndpoint = dialogEntries.json;
+            const sheetsuEndpoint = 'https://sheetsu.com/apis/v1.0su/8c894eb7a43d/sheets/exportList';
+            // const sheetsuEndpoint = dialogEntries.json;
             return fetchJSON(sheetsuEndpoint)
-                .then( async function (data) {
-                    let queue = data.map( function (matchup, matchupIndex) {
-                       let queueItem = exportMatchups(data, matchupIndex, homeLogoConts, awayLogoConts, exportableAssets)
-                       return queueItem;
-                    })
-                    const startQueue = Promise.all(queue);
-                    
-                    return startQueue;                 
+                .then( async function (matchups) {
+                    // Export rendition sets one at a time (an XD API requirement)
+                    for (const matchup of matchups) {
+                        let matchupIndex = matchups.indexOf(matchup);
+                        await exportRenditions(matchups, matchupIndex, homeLogoConts, awayLogoConts, exportableAssets, exportFolder);
+                    }
                 })
                 .catch( error => console.log(`Error fetching JSON: ${error}`) )
    
@@ -86,10 +86,10 @@ async function applyImagefill(logoConts, base64) {
     );
 }
 
-async function exportRenditions(data, matchupIndex, homeLogoConts, awayLogoConts, exportableAssets) {
+async function exportRenditions(data, matchupIndex, homeLogoConts, awayLogoConts, exportableAssets, folder) {
     try {
         if (exportableAssets.length > 0) {
-            const folder = await fs.getFolder();
+            // const folder = await fs.getFolder();
             const arr = await exportableAssets.map(async asset => {	
                 downloadImage(homeLogoConts, data, "home", matchupIndex);
                 downloadImage(awayLogoConts, data, "away", matchupIndex);
@@ -125,12 +125,6 @@ async function exportRenditions(data, matchupIndex, homeLogoConts, awayLogoConts
     }
 } 
 
-
-async function exportMatchups(data, matchupIndex, homeLogoConts, awayLogoConts, exportableAssets) {
-    return exportRenditions(data, matchupIndex, homeLogoConts, awayLogoConts, exportableAssets); 
-}
- 
-
 async function fetchJSON (endpoint) {
     const response = await fetch(endpoint);
     if (!response.ok) {
@@ -139,7 +133,6 @@ async function fetchJSON (endpoint) {
     const data = await response.json();
     return data;
 }
-
 
 
 module.exports = {

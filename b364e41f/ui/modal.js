@@ -20,16 +20,16 @@ async function showSetupDialog() {
                 id: 'sheetsuEndpoint',
                 label: 'Sheetsu URL'
             },
-            {
-                type: DialogHelper.TEXT_INPUT,
-                id: 'outputFolder',
-                label: 'Output Folder'
-            },
+            // {
+            //     type: DialogHelper.TEXT_INPUT,
+            //     id: 'outputFolder',
+            //     label: 'Output Folder'
+            // },
         ],
         // Dialog options
         {
             okButtonText: 'Export Images',
-            cancelButtonText: 'Cancel'
+            cancelButtonText: 'Cancel',
         });
         return result;
         // now, result is the object containing all the values
