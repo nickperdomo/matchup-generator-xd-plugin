@@ -38,14 +38,19 @@ async function myPluginCommand() {
             const sheetsuEndpoint = 'https://sheetsu.com/apis/v1.0su/8c894eb7a43d/sheets/exportList';
             // const sheetsuEndpoint = dialogEntries.json;
             return fetchJSON(sheetsuEndpoint)
+                .catch( error => {
+                    console.log(`Error fetching JSON: ${error}`);
+                })
                 .then( async function (matchups) {
                     // Export rendition sets one at a time (an XD API requirement)
                     for (const matchup of matchups) {
                         let matchupIndex = matchups.indexOf(matchup);
                         await exportRenditions(matchups, matchupIndex, homeLogoConts, awayLogoConts, exportableAssets, exportFolder);
                     }
+                    // Revert document to last saved stated (no XD API call exists yet)
+                    throw new Error('Revert to Saved');
                 })
-                .catch( error => console.log(`Error fetching JSON: ${error}`) )
+                
    
         })
         // .catch( reason => {
