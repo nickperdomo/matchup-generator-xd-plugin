@@ -17,8 +17,9 @@ async function myPluginCommand() {
             // Capture setup dialog entries
            const dialogEntries = {
                json: result['sheetsuEndpoint'],
+            //    exportEspanol: result['exportEspanol']
            }
-
+           console.log(dialogEntries.exportEspanol);
            // Ask user to pick an output folder
            const exportFolder = await fs.getFolder();
            

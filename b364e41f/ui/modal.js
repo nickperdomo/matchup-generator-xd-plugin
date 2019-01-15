@@ -21,9 +21,9 @@ async function showSetupDialog() {
                 label: 'Sheetsu URL'
             },
             // {
-            //     type: DialogHelper.TEXT_INPUT,
-            //     id: 'outputFolder',
-            //     label: 'Output Folder'
+            //     type: DialogHelper.CHECKBOX,
+            //     id: 'exportEspanol',
+            //     label: 'Export Espanol'
             // },
         ],
         // Dialog options
