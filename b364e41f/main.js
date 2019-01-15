@@ -43,8 +43,7 @@ async function myPluginCommand() {
                 })
                 .then( async function (matchups) {
                     // Export rendition sets one at a time (an XD API requirement)
-                    for (const matchup of matchups) {
-                        let matchupIndex = matchups.indexOf(matchup);
+                    for ( let [matchupIndex,matchup] of matchups.entries() ) {
                         await exportRenditions(matchups, matchupIndex, homeLogoConts, awayLogoConts, exportableAssets, exportFolder);
                     }
                     // Revert document to last saved stated (no XD API call exists yet)
