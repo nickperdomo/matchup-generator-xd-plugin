@@ -99,7 +99,7 @@ async function exportRenditions(data, matchupIndex, homeLogoConts, awayLogoConts
                 downloadImage(homeLogoConts, data, "home", matchupIndex);
                 downloadImage(awayLogoConts, data, "away", matchupIndex);
 
-                let fileName = `${data[matchupIndex].matchupName}_${asset.name}.jpg`;
+                let fileName = createFileName(asset.name, data[matchupIndex].matchupName);
                 const file = await folder.createFile(
                     fileName,
                     {overwrite: true}
@@ -140,6 +140,10 @@ async function fetchJSON (endpoint) {
     return data;
 }
 
+const createFileName = (assetName,matchupName) => {
+    const fileName = assetName.replace(/MATCHUPNAME/g, matchupName) + '.jpg';
+    return fileName;
+}
 
 module.exports = {
     commands: {
