@@ -35,7 +35,7 @@ async function myPluginCommand() {
             // console.log("Away: ", awayLogoConts);  
 
             // Download matchup data JSON
-            const sheetsuEndpoint = 'https://sheetsu.com/apis/v1.0su/8c894eb7a43d/sheets/exportList';
+            const sheetsuEndpoint = 'https://sheetsu.com/apis/v1.0su/8c894eb7a43d/sheets/custom-export';
             // const sheetsuEndpoint = dialogEntries.json;
             return fetchJSON(sheetsuEndpoint)
                 .catch( error => {
