@@ -19,9 +19,12 @@ async function myPluginCommand() {
                json: result['sheetsuEndpoint'],
             //    exportEspanol: result['exportEspanol']
            }
-           console.log(dialogEntries.exportEspanol);
+
            // Ask user to pick an output folder
            const exportFolder = await fs.getFolder();
+           const entries = await exportFolder.getEntries();
+           const allFolders = entries.filter( entry => !entry.isFile)
+           console.log(allFolders[0].name);
            
             // Capture exportableAssets(exportable assets) and team logo containers
             const exportableAssets = root.children.filter(child => child.markedForExport);
