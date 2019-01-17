@@ -3,7 +3,7 @@
  */
 const application = require("application");
 const fs = require("uxp").storage.localFileSystem;
-const { Rectangle, Color, ImageFill } = require("scenegraph");
+const { ImageFill } = require("scenegraph");
 const { xhrBinary, base64ArrayBuffer } = require("./utils/network");
 const { showSetupDialog } = require("./ui/modal");
 
@@ -22,11 +22,24 @@ async function myPluginCommand() {
 
            // Ask user to pick an output folder
            const exportFolder = await fs.getFolder();
+           // Check if foxnow and fsgo subfolders exist
            const entries = await exportFolder.getEntries();
-           const allFolders = entries.filter( entry => !entry.isFile)
-           console.log(allFolders[0].name);
+           const allFolders = entries.filter( entry => entry.isFolder);
+           if (allFolders.length > 0) {
+               const exportSubfolders = allFolders.filter(folder => folder.name === 'foxnow')[0];
+               console.log(exportSubfolders[0]);
+               
+            //    if ( allFolders.indexOf() )
+            //     const foxnowFolder = await exportFolder.createFolder("foxnow");
+            //     const fsgoFolder = await exportFolder.createFolder("fsgo");
+           } else {
+                // console.log(allFolders[0].name);
+                const foxnowFolder = await exportFolder.createFolder("foxnow");
+                const fsgoFolder = await exportFolder.createFolder("fsgo");
+           }
            
-            // Capture exportableAssets(exportable assets) and team logo containers
+           
+            // Capture assets marked for export and team logo containers
             const exportableAssets = root.children.filter(child => child.markedForExport);
             const homeLogoConts = [],
                   awayLogoConts = [];
