@@ -22,22 +22,28 @@ async function myPluginCommand() {
 
            // Ask user to pick an output folder
            const exportFolder = await fs.getFolder();
-           // Check if foxnow and fsgo subfolders exist
+           let exportSubfolders = [];
+           // Check if foxnow and fsgo subfolders exist 
            const entries = await exportFolder.getEntries();
-           const allFolders = entries.filter( entry => entry.isFolder);
-           if (allFolders.length > 0) {
-               const exportSubfolders = allFolders.filter(folder => folder.name === 'foxnow')[0];
-               console.log(exportSubfolders[0]);
-               
-            //    if ( allFolders.indexOf() )
-            //     const foxnowFolder = await exportFolder.createFolder("foxnow");
-            //     const fsgoFolder = await exportFolder.createFolder("fsgo");
-           } else {
-                // console.log(allFolders[0].name);
+           const folderEntries = await entries.filter(entry => entry.isFolder);
+           folderEntries.forEach( folder => {
+                if (folder.name === 'foxnow' || folder.name === 'fsgo'){
+                    exportSubfolders.push(folder)
+                }
+           });
+           // Create them if they don't exist
+           if (exportSubfolders.length === 0){
                 const foxnowFolder = await exportFolder.createFolder("foxnow");
                 const fsgoFolder = await exportFolder.createFolder("fsgo");
+                exportSubfolders = [foxnowFolder,fsgoFolder]    
+           } else if (exportSubfolders.length < 2){
+               console.log('Less than two export subfolders were found.')
+                if (exportSubfolders[0].name === 'foxnow'){
+                    const fsgoFolder = await exportFolder.createFolder("fsgo");
+                } else {
+                    const foxnowFolder = await exportFolder.createFolder("foxnow");
+                }
            }
-           
            
             // Capture assets marked for export and team logo containers
             const exportableAssets = root.children.filter(child => child.markedForExport);
