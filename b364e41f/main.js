@@ -23,6 +23,7 @@ async function myPluginCommand() {
            // Ask user to pick an output folder
            const exportFolder = await fs.getFolder();
            let exportSubfolders = [];
+
            // Check if foxnow and fsgo subfolders exist 
            const entries = await exportFolder.getEntries();
            const folderEntries = await entries.filter(entry => entry.isFolder);
@@ -35,13 +36,16 @@ async function myPluginCommand() {
            if (exportSubfolders.length === 0){
                 const foxnowFolder = await exportFolder.createFolder("foxnow");
                 const fsgoFolder = await exportFolder.createFolder("fsgo");
-                exportSubfolders = [foxnowFolder,fsgoFolder]    
+                exportSubfolders = [foxnowFolder,fsgoFolder]
+           // If only one exists, create the other and add it to the
+           // array with foxnow always first in the array
            } else if (exportSubfolders.length < 2){
-               console.log('Less than two export subfolders were found.')
                 if (exportSubfolders[0].name === 'foxnow'){
                     const fsgoFolder = await exportFolder.createFolder("fsgo");
+                    exportSubfolders.push(fsgoFolder);
                 } else {
                     const foxnowFolder = await exportFolder.createFolder("foxnow");
+                    exportSubfolders.unshift(foxnowFolder);
                 }
            }
            
@@ -67,7 +71,7 @@ async function myPluginCommand() {
                 .then( async function (matchups) {
                     // Export rendition sets one at a time (an XD API requirement)
                     for ( let [matchupIndex,matchup] of matchups.entries() ) {
-                        await exportRenditions(matchups, matchupIndex, homeLogoConts, awayLogoConts, exportableAssets, exportFolder);
+                        await exportRenditions(matchups, matchupIndex, homeLogoConts, awayLogoConts, exportableAssets, exportSubfolders);
                     }
                     // Revert document to last saved stated (no XD API call exists yet)
                     throw new Error('Revert to Saved');
@@ -113,16 +117,26 @@ async function applyImagefill(logoConts, base64) {
     );
 }
 
-async function exportRenditions(data, matchupIndex, homeLogoConts, awayLogoConts, exportableAssets, folder) {
+async function exportRenditions(data, matchupIndex, homeLogoConts, awayLogoConts, exportableAssets, folders) {
     try {
+        const foxnowSubfolder = folders[0];
+        const fsgoSubfolder = folders[1];
+        let outputFolder;
+
         if (exportableAssets.length > 0) {
-            // const folder = await fs.getFolder();
-            const arr = await exportableAssets.map(async asset => {	
+            const arr = await exportableAssets.map(async asset => {	   
                 downloadImage(homeLogoConts, data, "home", matchupIndex);
                 downloadImage(awayLogoConts, data, "away", matchupIndex);
+                
+                // Set the output folder based on the dimensions of the artboard
+                if (asset.width === 720 && asset.height === 440) {
+                    outputFolder = fsgoSubfolder;
+                } else {
+                    outputFolder = foxnowSubfolder; 
+                } 
 
                 let fileName = createFileName(asset.name, data[matchupIndex].matchupName);
-                const file = await folder.createFile(
+                const file = await outputFolder.createFile(
                     fileName,
                     {overwrite: true}
                 );
