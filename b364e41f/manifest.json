@@ -8,8 +8,8 @@
   "id" : "b364e41f",
   "icons" : [ {
     "path" : "images/icon.png",
-    "width" : 96,
-    "height" : 96
+    "width" : 128,
+    "height" : 128
   } ],
   "uiEntryPoints" : [ {
     "label" : "Matchup Image Generator",
