@@ -1,9 +1,5 @@
 /* Created by Nick Perdomo
-<<<<<<< HEAD
- * Questions, praise, hate? Spam me at nickperdomo121@gmail.com
-=======
  * Questions, praise, hate? Sling it here: nickperdomo121@gmail.com
->>>>>>> origin/promiseRefactor
  */
 const application = require("application");
 const fs = require("uxp").storage.localFileSystem;
@@ -11,47 +7,6 @@ const { ImageFill } = require("scenegraph");
 const { xhrBinary, base64ArrayBuffer } = require("./utils/network");
 const { showSetupDialog } = require("./ui/modal");
 
-<<<<<<< HEAD
-
-// The main function fires when a user clicks the menu item in Plugins.
-function myPluginCommand(selection, documentRoot) {
-    return setupDialog.showModal().then(result => {
-        let docNode = documentRoot;
-        
-        // Capture all assets marked for export and team logo containers
-        const exportableAssets = docNode.children.filter(child => child.markedForExport);
-        const homeLogoConts = 
-            exportableAssets.map(asset => 
-                asset.children.filter(child => 
-                    child.name === 'homeLogoContainer'
-                )[0]
-            );
-        const awayLogoConts = 
-            exportableAssets.map(asset => 
-                asset.children.filter(child => 
-                    child.name === 'awayLogoContainer'
-                )[0]
-            );
-
-        // TODO: Remove sport selector and pull all required data from JSON
-        // which should include logo urls and tricodes for file names
-        const exportListJSON = 'https://sheetsu.com/apis/v1.0su/8c894eb7a43d/sheets/exportList';
-
-        // return statement of plugin handler
-        return fetch(exportListJSON)
-            .then(function (response) {
-                return response.json();
-            })
-            .then(function (jsonResponse) {
-                return (
-                    console.log(jsonResponse),
-                    downloadImage(homeLogoConts, jsonResponse, "home"),
-                    downloadImage(awayLogoConts, jsonResponse, "away")
-                );
-            })
-            .then( function () {
-                return exportRenditions(exportableAssets); 
-=======
 
 // The main function fires when a user clicks the menu item in Plugins.
 async function myPluginCommand() {
@@ -102,7 +57,6 @@ async function myPluginCommand() {
             exportableAssets.forEach( asset => {
                 homeLogoConts.push( asset.children.filter(child => child.name === 'homeLogoContainer')[0] )
                 awayLogoConts.push( asset.children.filter(child => child.name === 'awayLogoContainer')[0] )
->>>>>>> origin/promiseRefactor
             });
             // console.log("Home: ", homeLogoConts);
             // console.log("Away: ", awayLogoConts);  
