@@ -1,7 +1,7 @@
 {
   "name": "b364e41f",
   "version": "1.0.0",
-  "description": "An Adobe XD plugin for generating sports matchup images.",
+  "description": "An Adobe XD plugin that generates and exports matchup image sets from a JSON feed.",
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

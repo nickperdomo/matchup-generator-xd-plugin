@@ -1,18 +1,18 @@
 {
-  "name" : "Matchup Generator",
+  "name" : "Matchup Image Generator",
   "host" : {
     "app" : "XD",
-    "minVersion" : "13.0.0"
+    "minVersion" : "14.0.0"
   },
-  "description" : "Sample plugin for Adobe XD, providing starter project scaffolding.",
+  "description" : "Generates and exports matchup image sets from a JSON feed.",
   "id" : "b364e41f",
   "icons" : [ {
     "path" : "images/icon.png",
-    "width" : 96,
-    "height" : 96
+    "width" : 128,
+    "height" : 128
   } ],
   "uiEntryPoints" : [ {
-    "label" : "My Plugin",
+    "label" : "Matchup Image Generator",
     "type" : "menu",
     "commandId" : "myPluginCommand"
   } ],
