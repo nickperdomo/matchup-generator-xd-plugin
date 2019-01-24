@@ -27,7 +27,7 @@ async function myPluginCommand() {
                localLogos,
                logoOverrides = [];      
            
-           // Check if foxnow and fsgo subfolders exist 
+           // Check if foxnow, fsgo, and logos subfolders exist 
            const entries = await exportFolder.getEntries();
            const folderEntries = await entries.filter(entry => entry.isFolder);
            folderEntries.forEach( folder => {
@@ -92,6 +92,23 @@ async function myPluginCommand() {
                     console.log(`Error fetching JSON: ${error}`);
                 })
                 .then( async function (matchups) {
+                    
+                    // TODO: Loop through matchups to find matching local logos
+                    if (logoOverrides.length > 0){
+                        matchups.forEach(matchup => {
+                            logoOverrides.forEach(override => {
+                                if ( matchup.awayTeamLogoURL.search("/"+ override.name) !== -1 ){
+                                    matchup.awayTeamLogoURL = override.image;
+                                }
+                                if ( matchup.homeTeamLogoURL.search("/"+ override.name) !== -1 ){
+                                    matchup.homeTeamLogoURL = override.image;
+                                }   
+                            });
+                        });
+                    };
+                    console.log(matchups);
+                    // TODO: Create new JSON variable containing merge of original data with overrides
+                    
                     // Export rendition sets one at a time (an XD API requirement)
                     for ( let [matchupIndex,matchup] of matchups.entries() ) {
                         await exportRenditions(matchups, matchupIndex, homeLogoConts, awayLogoConts, exportableAssets, exportSubfolders);
@@ -121,10 +138,18 @@ async function downloadImage(logoConts, jsonResponse, team, matchupIndex) {
                     return null;
             }
         })(team);
-    
-        const logoUrl = jsonResponse[matchupIndex][logoSide];
-        const logoObj = await xhrBinary(logoUrl);
-        const logoObjBase64 = await base64ArrayBuffer(logoObj);
+        if (jsonResponse[matchupIndex][logoSide].search('http') !== -1){
+            const logoUrl = jsonResponse[matchupIndex][logoSide];
+            const logoObj = await xhrBinary(logoUrl);
+            const logoObjBase64 = await base64ArrayBuffer(logoObj);
+        } else {
+            const logoObj = jsonResponse[matchupIndex][logoSide];
+            const logoObjBase64 = await base64ArrayBuffer(logoObj);
+        }
+
+        // const logoUrl = jsonResponse[matchupIndex][logoSide];
+        // const logoObj = await xhrBinary(logoUrl);
+        // const logoObjBase64 = await base64ArrayBuffer(logoObj);
         applyImagefill(logoConts, logoObjBase64);
 
     } catch (err) {
