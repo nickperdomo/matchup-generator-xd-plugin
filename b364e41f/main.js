@@ -17,21 +17,27 @@ async function myPluginCommand() {
             // Capture setup dialog entries
            const dialogEntries = {
                json: result['sheetsuEndpoint'],
-            //    exportEspanol: result['exportEspanol']
+            //    localLogos: result['localLogos']
            }
 
            // Ask user to pick an output folder
            const exportFolder = await fs.getFolder();
            let exportSubfolders = [];
-
+           let logosFolder,
+               localLogos,
+               logoOverrides = [];      
+           
            // Check if foxnow and fsgo subfolders exist 
            const entries = await exportFolder.getEntries();
            const folderEntries = await entries.filter(entry => entry.isFolder);
            folderEntries.forEach( folder => {
                 if (folder.name === 'foxnow' || folder.name === 'fsgo'){
                     exportSubfolders.push(folder)
+                } else if (folder.name === 'logos'){
+                    logosFolder = folder;
                 }
            });
+
            // Create them if they don't exist
            if (exportSubfolders.length === 0){
                 const foxnowFolder = await exportFolder.createFolder("foxnow");
@@ -49,6 +55,23 @@ async function myPluginCommand() {
                 }
            }
            
+           // Check for local logo overrides
+            if (logosFolder) {
+                localLogos = await logosFolder.getEntries();
+                console.log("Found local logos:")
+                localLogos.forEach( logo => {
+                   let override = {
+                       image: logo,
+                       name: logo.name,
+                   }
+                   console.log(override.name);
+                   logoOverrides.push(override);
+                });
+            } else {
+                console.log("A 'logos' subfolder in the export folder is missing.");
+            }
+
+
             // Capture assets marked for export and team logo containers
             const exportableAssets = root.children.filter(child => child.markedForExport);
             const homeLogoConts = [],

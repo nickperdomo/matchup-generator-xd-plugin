@@ -22,8 +22,8 @@ async function showSetupDialog() {
             },
             // {
             //     type: DialogHelper.CHECKBOX,
-            //     id: 'exportEspanol',
-            //     label: 'Export Espanol'
+            //     id: 'localLogos',
+            //     label: 'Use Local Logos'
             // },
         ],
         // Dialog options
@@ -31,6 +31,7 @@ async function showSetupDialog() {
             okButtonText: 'Export Images',
             cancelButtonText: 'Cancel',
         });
+        
         return result;
         // now, result is the object containing all the values
         // await someExampleAsynchronousFunction();
