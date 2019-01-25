@@ -58,19 +58,16 @@ async function myPluginCommand() {
            // Check for local logo overrides
             if (logosFolder) {
                 localLogos = await logosFolder.getEntries();
-                console.log("Found local logos:")
+                // console.log("Found local logos:")
                 localLogos.forEach( logo => {
                    let override = {
                        image: logo,
                        name: logo.name,
+                       path: logo.nativePath,
                    }
-                   console.log(override.name);
+                //    console.log(override.name);
                    logoOverrides.push(override);
                 });
-            } else {
-                console.log("A 'logos' subfolder in the export folder is missing.");
-            }
-
 
             // Capture assets marked for export and team logo containers
             const exportableAssets = root.children.filter(child => child.markedForExport);
@@ -81,8 +78,6 @@ async function myPluginCommand() {
                 homeLogoConts.push( asset.children.filter(child => child.name === 'homeLogoContainer')[0] )
                 awayLogoConts.push( asset.children.filter(child => child.name === 'awayLogoContainer')[0] )
             });
-            // console.log("Home: ", homeLogoConts);
-            // console.log("Away: ", awayLogoConts);  
 
             // Download matchup data JSON
             const sheetsuEndpoint = 'https://sheetsu.com/apis/v1.0su/8c894eb7a43d/sheets/custom-export';
@@ -91,23 +86,21 @@ async function myPluginCommand() {
                 .catch( error => {
                     console.log(`Error fetching JSON: ${error}`);
                 })
-                .then( async function (matchups) {
-                    
-                    // TODO: Loop through matchups to find matching local logos
+                .then( async function (matchups) {        
+                    // Loop through all matchups for each local logo to find matching teams
                     if (logoOverrides.length > 0){
-                        matchups.forEach(matchup => {
-                            logoOverrides.forEach(override => {
-                                if ( matchup.awayTeamLogoURL.search("/"+ override.name) !== -1 ){
+                        logoOverrides.forEach(override => {
+                            matchups.forEach(matchup => {
+                                if ( typeof matchup.awayTeamLogoURL === 'string' && matchup.awayTeamLogoURL.search("/"+ override.name) !== -1 ){
                                     matchup.awayTeamLogoURL = override.image;
                                 }
-                                if ( matchup.homeTeamLogoURL.search("/"+ override.name) !== -1 ){
+                                if ( typeof matchup.homeTeamLogoURL === 'string' && matchup.homeTeamLogoURL.search("/"+ override.name) !== -1 ){
                                     matchup.homeTeamLogoURL = override.image;
-                                }   
+                                }
                             });
                         });
-                    };
-                    console.log(matchups);
-                    // TODO: Create new JSON variable containing merge of original data with overrides
+                        // console.log(matchups);
+                    }
                     
                     // Export rendition sets one at a time (an XD API requirement)
                     for ( let [matchupIndex,matchup] of matchups.entries() ) {
@@ -138,19 +131,21 @@ async function downloadImage(logoConts, jsonResponse, team, matchupIndex) {
                     return null;
             }
         })(team);
-        if (jsonResponse[matchupIndex][logoSide].search('http') !== -1){
-            const logoUrl = jsonResponse[matchupIndex][logoSide];
-            const logoObj = await xhrBinary(logoUrl);
-            const logoObjBase64 = await base64ArrayBuffer(logoObj);
-        } else {
-            const logoObj = jsonResponse[matchupIndex][logoSide];
-            const logoObjBase64 = await base64ArrayBuffer(logoObj);
+        let logoUrl,
+            logoObj,
+            logoObjBase64,
+            localLogo;
+
+        if (typeof jsonResponse[matchupIndex][logoSide] === 'string'){
+            logoUrl = jsonResponse[matchupIndex][logoSide];
+            logoObj = await xhrBinary(logoUrl);
+            logoObjBase64 = await base64ArrayBuffer(logoObj);
+            localLogo = false;
+        } else { // Handle logo override
+            localLogo = jsonResponse[matchupIndex][logoSide];
         }
 
-        // const logoUrl = jsonResponse[matchupIndex][logoSide];
-        // const logoObj = await xhrBinary(logoUrl);
-        // const logoObjBase64 = await base64ArrayBuffer(logoObj);
-        applyImagefill(logoConts, logoObjBase64);
+        applyImagefill(logoConts, logoObjBase64, localLogo);
 
     } catch (err) {
         console.log("error");
@@ -158,8 +153,15 @@ async function downloadImage(logoConts, jsonResponse, team, matchupIndex) {
     }
 }
 
-async function applyImagefill(logoConts, base64) {
-    const imageFill = new ImageFill(`data:image/png;base64,${base64}`);
+async function applyImagefill(logoConts, base64, localImage) {
+    let imageFill;
+    
+    if (localImage === false){
+        imageFill = new ImageFill(`data:image/png;base64,${base64}`);
+    } else {
+        imageFill = new ImageFill(localImage);
+    }
+
     logoConts.forEach(container =>
         container.fill = imageFill
     );
