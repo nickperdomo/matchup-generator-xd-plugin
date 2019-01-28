@@ -81,8 +81,14 @@ async function myPluginCommand() {
             });
 
             // Download matchup data JSON
-            const sheetsuEndpoint = 'https://sheetsu.com/apis/v1.0su/8c894eb7a43d/sheets/custom-export';
-            // const sheetsuEndpoint = dialogEntries.json;
+            let sheetsuEndpoint;
+            if (dialogEntries.json) {
+                sheetsuEndpoint = dialogEntries.json;
+            } else {
+                // Default to the NFL custom-export sheet if Sheetsu URL is left empty (useful for testing)
+                sheetsuEndpoint = 'https://sheetsu.com/apis/v1.0su/8c894eb7a43d/sheets/custom-export';
+            }
+
             return fetchJSON(sheetsuEndpoint)
                 .catch( error => {
                     console.log(`Error fetching JSON: ${error}`);
