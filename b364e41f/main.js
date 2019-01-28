@@ -68,6 +68,7 @@ async function myPluginCommand() {
                 //    console.log(override.name);
                    logoOverrides.push(override);
                 });
+            }
 
             // Capture assets marked for export and team logo containers
             const exportableAssets = root.children.filter(child => child.markedForExport);
@@ -109,8 +110,6 @@ async function myPluginCommand() {
                     // Revert document to last saved stated (no XD API call exists yet)
                     throw new Error('Revert to Saved');
                 })
-                
-   
         })
         // .catch( reason => {
         //     console.log(`Error with setup dialog: ${reason}`)
