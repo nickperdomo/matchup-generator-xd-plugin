@@ -6,12 +6,13 @@ const uxp = require("uxp").storage;
 const fs = uxp.localFileSystem;
 const { ImageFill } = require("scenegraph");
 const { xhrBinary, base64ArrayBuffer } = require("./utils/network");
-const { showSetupDialog } = require("./ui/modal");
+const { showSetupDialog, showMissingAlert } = require("./ui/modal");
 
 
 // The main function fires when a user clicks the menu item in Plugins.
 async function myPluginCommand() {
     const { root } = require("scenegraph");
+    let missingLogos = [];
     // Get the last used Sheetsu URL from the plugin data file
     const pluginDataFolder = await fs.getDataFolder();
     let pluginDataFile = await pluginDataFolder.getEntry("pluginData.txt")
@@ -126,8 +127,9 @@ async function myPluginCommand() {
                     
                     // Export rendition sets one at a time (an XD API requirement)
                     for ( let [matchupIndex,matchup] of matchups.entries() ) {
-                        await exportRenditions(matchups, matchupIndex, homeLogoConts, awayLogoConts, exportableAssets, exportSubfolders);
+                        await exportRenditions(matchups, matchupIndex, homeLogoConts, awayLogoConts, exportableAssets, exportSubfolders, missingLogos);
                     }
+                    showMissingAlert(sanitizeList(missingLogos));
                     // Revert document to last saved stated (no XD API call exists yet)
                     throw new Error('Revert to Saved');
                 })
@@ -138,8 +140,24 @@ async function myPluginCommand() {
 } // plugin command end
     
 
+function sanitizeList(list) {
+    let cleanList = [];
+    let formattedList = "";
 
-async function downloadImage(logoConts, jsonResponse, team, matchupIndex) {
+    const uniques = list.filter((item, index, a) => a.indexOf(item) == index);
+    uniques.forEach( item => {
+        let itemName = item.match(/(\d+\.png)/g)[0];
+        cleanList.push(itemName);
+    });
+    
+    cleanList.forEach( item => {
+        formattedList += `${item}\n`;
+    });
+
+    return cleanList;
+}
+
+async function downloadImage(logoConts, jsonResponse, team, matchupIndex, missingList) {
     try {
         const logoSide = (team => {
             switch (team) {
@@ -157,10 +175,14 @@ async function downloadImage(logoConts, jsonResponse, team, matchupIndex) {
             localLogo;
 
         if (typeof jsonResponse[matchupIndex][logoSide] === 'string'){
-            logoUrl = jsonResponse[matchupIndex][logoSide];
-            logoObj = await xhrBinary(logoUrl);
-            logoObjBase64 = await base64ArrayBuffer(logoObj);
-            localLogo = false;
+            try {
+                logoUrl = jsonResponse[matchupIndex][logoSide];
+                logoObj = await xhrBinary(logoUrl);
+                logoObjBase64 = await base64ArrayBuffer(logoObj);
+                localLogo = false;
+            } catch (err) {
+                missingList.push(jsonResponse[matchupIndex][logoSide]);
+            }   
         } else { // Handle logo override
             localLogo = jsonResponse[matchupIndex][logoSide];
         }
@@ -168,7 +190,6 @@ async function downloadImage(logoConts, jsonResponse, team, matchupIndex) {
         applyImagefill(logoConts, logoObjBase64, localLogo);
 
     } catch (err) {
-        console.log("error");
         console.log(err.message);
     }
 }
@@ -187,15 +208,15 @@ async function applyImagefill(logoConts, base64, localImage) {
     });
 }
 
-async function exportRenditions(data, matchupIndex, homeLogoConts, awayLogoConts, exportableAssets, folders) {
+async function exportRenditions(data, matchupIndex, homeLogoConts, awayLogoConts, exportableAssets, folders, missingList) {
     try {
         const foxnowSubfolder = folders[0];
         const fsgoSubfolder = folders[1];
         let outputFolder;
 
         if (exportableAssets.length > 0) {
-            await downloadImage(homeLogoConts, data, "home", matchupIndex);
-            await downloadImage(awayLogoConts, data, "away", matchupIndex);
+            await downloadImage(homeLogoConts, data, "home", matchupIndex, missingList);
+            await downloadImage(awayLogoConts, data, "away", matchupIndex, missingList);
             const arr = await exportableAssets.map(async asset => {	   
                 // Set the output folder based on the dimensions of the artboard
                 if (asset.width === 720 && asset.height === 440) {

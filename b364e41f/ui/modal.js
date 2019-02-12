@@ -29,6 +29,35 @@ async function showSetupDialog(url) {
     }    
 }
 
+async function showMissingAlert(missingList) {
+    try {
+        const result = await DialogHelper.showDialog('missingAlert', 'Missing Logos', 
+        // Dialog contents
+        [
+            {
+                type: DialogHelper.HR,
+                id: 'titleHR'
+            },
+            {   
+                type: DialogHelper.TEXT,
+                id: 'list',
+                label: `${missingList}`,
+            },
+        ],
+        // Dialog options
+        {
+            okButtonText: 'Shucks',
+            // cancelButtonText: 'Cancel',
+        });
+        
+        return result;
+    } catch (e) {
+        return console.log(e);
+        // The dialog got canceled by the user.
+    }    
+}
+
 module.exports = {
-    showSetupDialog: showSetupDialog, 
+    showSetupDialog: showSetupDialog,
+    showMissingAlert: showMissingAlert, 
 };
