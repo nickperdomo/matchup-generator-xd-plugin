@@ -22,7 +22,6 @@ async function myPluginCommand() {
         })
         .then( async file => {
             const lastUsedURL = await file.read();
-            console.log("lastUsedURL: " + lastUsedURL)
             return lastUsedURL;
         })
 
@@ -34,9 +33,7 @@ async function myPluginCommand() {
                json: result['sheetsuEndpoint'],
            }
            let pluginData = await pluginDataFolder.createFile("pluginData.txt", {overwrite: true});
-           await pluginData.write(dialogEntries.json);
-           console.log("File contents: ", await pluginData.read() );
-           
+           await pluginData.write(dialogEntries.json);           
 
            // Ask user to pick an output folder
            const exportFolder = await fs.getFolder();
