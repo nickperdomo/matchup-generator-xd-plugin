@@ -2,7 +2,8 @@
  * Questions, praise, hate? Sling it here: nickperdomo121@gmail.com
  */
 const application = require("application");
-const fs = require("uxp").storage.localFileSystem;
+const uxp = require("uxp").storage;
+const fs = uxp.localFileSystem;
 const { ImageFill } = require("scenegraph");
 const { xhrBinary, base64ArrayBuffer } = require("./utils/network");
 const { showSetupDialog } = require("./ui/modal");
@@ -167,9 +168,9 @@ async function applyImagefill(logoConts, base64, localImage) {
         imageFill = new ImageFill(localImage);
     }
 
-    logoConts.forEach(container =>
-        container.fill = imageFill
-    );
+    logoConts.forEach(container => {
+        container.fill = imageFill;
+    });
 }
 
 async function exportRenditions(data, matchupIndex, homeLogoConts, awayLogoConts, exportableAssets, folders) {
@@ -179,10 +180,9 @@ async function exportRenditions(data, matchupIndex, homeLogoConts, awayLogoConts
         let outputFolder;
 
         if (exportableAssets.length > 0) {
+            await downloadImage(homeLogoConts, data, "home", matchupIndex);
+            await downloadImage(awayLogoConts, data, "away", matchupIndex);
             const arr = await exportableAssets.map(async asset => {	   
-                downloadImage(homeLogoConts, data, "home", matchupIndex);
-                downloadImage(awayLogoConts, data, "away", matchupIndex);
-                
                 // Set the output folder based on the dimensions of the artboard
                 if (asset.width === 720 && asset.height === 440) {
                     outputFolder = fsgoSubfolder;
