@@ -12,14 +12,31 @@ const { showSetupDialog } = require("./ui/modal");
 // The main function fires when a user clicks the menu item in Plugins.
 async function myPluginCommand() {
     const { root } = require("scenegraph");
+    // Get the last used Sheetsu URL from the plugin data file
+    const pluginDataFolder = await fs.getDataFolder();
+    let pluginDataFile = await pluginDataFolder.getEntry("pluginData.txt")
+        .catch( error => {
+            const lastUsedURL = "";
+            console.log(`Plugin file doesn't exist.: ${error}`);
+            return lastUsedURL;
+        })
+        .then( async file => {
+            const lastUsedURL = await file.read();
+            console.log("lastUsedURL: " + lastUsedURL)
+            return lastUsedURL;
+        })
+
     // return statement of plugin handler (MUST BE A PROMISE!)
-    return showSetupDialog()
+    return showSetupDialog(pluginDataFile)
         .then( async function (result) {
             // Capture setup dialog entries
            const dialogEntries = {
                json: result['sheetsuEndpoint'],
-            //    localLogos: result['localLogos']
            }
+           let pluginData = await pluginDataFolder.createFile("pluginData.txt", {overwrite: true});
+           await pluginData.write(dialogEntries.json);
+           console.log("File contents: ", await pluginData.read() );
+           
 
            // Ask user to pick an output folder
            const exportFolder = await fs.getFolder();

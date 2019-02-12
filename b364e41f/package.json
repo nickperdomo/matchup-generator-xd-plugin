@@ -1,6 +1,6 @@
 {
   "name": "b364e41f",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "An Adobe XD plugin that generates and exports matchup image sets from a JSON feed.",
   "main": "main.js",
   "scripts": {
