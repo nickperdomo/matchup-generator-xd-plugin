@@ -51,7 +51,7 @@ async function showMissingAlert(missingList) {
             {   
                 type: DialogHelper.TEXT,
                 id: 'tip',
-                label: "Continue to begin exporting without the missing logos (wrong logos will appear in those sets) or cancel to add them online or locally.",
+                label: "Continuing will export all matchups, however, matchups with missing logos will display incorrect logos in their assets.",
             },
         ],
         // Dialog options
