@@ -34,7 +34,7 @@ async function myPluginCommand() {
                json: result['sheetsuEndpoint'],
            }
            let pluginData = await pluginDataFolder.createFile("pluginData.txt", {overwrite: true});
-           await pluginData.write(dialogEntries.json);           
+           await pluginData.write(dialogEntries.json); 
 
            // Ask user to pick an output folder
            const exportFolder = await fs.getFolder();
@@ -109,7 +109,7 @@ async function myPluginCommand() {
                 .catch( error => {
                     console.log(`Error fetching JSON: ${error}`);
                 })
-                .then( async function (matchups) {        
+                .then( async function (matchups) {
                     // Loop through all matchups for each local logo to find matching teams
                     if (logoOverrides.length > 0){
                         logoOverrides.forEach(override => {
@@ -124,12 +124,13 @@ async function myPluginCommand() {
                         });
                         // console.log(matchups);
                     }
-                    
+                    // Check URLs of non-local logos before processing exportable sets
+                    await checkLogos(matchups);
+
                     // Export rendition sets one at a time (an XD API requirement)
                     for ( let [matchupIndex,matchup] of matchups.entries() ) {
-                        await exportRenditions(matchups, matchupIndex, homeLogoConts, awayLogoConts, exportableAssets, exportSubfolders, missingLogos);
+                        await exportRenditions(matchups, matchupIndex, homeLogoConts, awayLogoConts, exportableAssets, exportSubfolders);
                     }
-                    showMissingAlert(sanitizeList(missingLogos));
                     // Revert document to last saved stated (no XD API call exists yet)
                     throw new Error('Revert to Saved');
                 })
@@ -140,24 +141,52 @@ async function myPluginCommand() {
 } // plugin command end
     
 
-function sanitizeList(list) {
-    let cleanList = [];
-    let formattedList = "";
 
-    const uniques = list.filter((item, index, a) => a.indexOf(item) == index);
-    uniques.forEach( item => {
-        let itemName = item.match(/(\d+\.png)/g)[0];
-        cleanList.push(itemName);
-    });
+async function checkLogos(jsonResponse) {
+    let missingLogoURLs = [];
+    let allLogoURLs = jsonResponse
+        .map( matchup => [matchup.homeTeamLogoURL, matchup.awayTeamLogoURL])
+        .reduce((acc, val) => acc.concat(val), [])
+        .filter((item, index, a) => a.indexOf(item) == index);
     
-    cleanList.forEach( item => {
-        formattedList += `${item}\n`;
-    });
+    const startCheck = async (list) => {
+        await asyncForEach(allLogoURLs, async (url) => {
+            await checkURL(url, list);
+        })
+    }
+    await startCheck(missingLogoURLs);
+    return showMissingAlert(sanitizeList(missingLogoURLs));
 
-    return cleanList;
+
+    async function checkURL(url, list) {
+        if (typeof url === 'string'){
+            try {
+                let logoObj = await xhrBinary(url);
+            } catch (err) {
+                list.push(url);
+            }    
+        }
+    }
+    
+    async function asyncForEach(array, callback) {
+        for (let index = 0; index < array.length; index++) {
+          await callback(array[index], index, array)
+        }
+    } 
 }
 
-async function downloadImage(logoConts, jsonResponse, team, matchupIndex, missingList) {
+function sanitizeList(list) {
+    let cleanList = [];
+
+    list.forEach( item => {
+        let itemName = item.match(/(\d+\.png)/g)[0];
+        cleanList.push(` ${itemName}`);
+    });
+
+    return cleanList.toString().trimStart();
+}
+
+async function downloadImage(logoConts, jsonResponse, team, matchupIndex) {
     try {
         const logoSide = (team => {
             switch (team) {
@@ -181,7 +210,6 @@ async function downloadImage(logoConts, jsonResponse, team, matchupIndex, missin
                 logoObjBase64 = await base64ArrayBuffer(logoObj);
                 localLogo = false;
             } catch (err) {
-                missingList.push(jsonResponse[matchupIndex][logoSide]);
             }   
         } else { // Handle logo override
             localLogo = jsonResponse[matchupIndex][logoSide];
@@ -208,15 +236,15 @@ async function applyImagefill(logoConts, base64, localImage) {
     });
 }
 
-async function exportRenditions(data, matchupIndex, homeLogoConts, awayLogoConts, exportableAssets, folders, missingList) {
+async function exportRenditions(data, matchupIndex, homeLogoConts, awayLogoConts, exportableAssets, folders) {
     try {
         const foxnowSubfolder = folders[0];
         const fsgoSubfolder = folders[1];
         let outputFolder;
 
         if (exportableAssets.length > 0) {
-            await downloadImage(homeLogoConts, data, "home", matchupIndex, missingList);
-            await downloadImage(awayLogoConts, data, "away", matchupIndex, missingList);
+            await downloadImage(homeLogoConts, data, "home", matchupIndex);
+            await downloadImage(awayLogoConts, data, "away", matchupIndex);
             const arr = await exportableAssets.map(async asset => {	   
                 // Set the output folder based on the dimensions of the artboard
                 if (asset.width === 720 && asset.height === 440) {
