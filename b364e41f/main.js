@@ -13,28 +13,41 @@ const { showSetupDialog, showMissingAlert } = require("./ui/modal");
 async function myPluginCommand() {
     const { root } = require("scenegraph");
     let missingLogos = [];
+
     // Get the last used Sheetsu URL from the plugin data file
     const pluginDataFolder = await fs.getDataFolder();
-    let pluginDataFile = await pluginDataFolder.getEntry("pluginData.txt")
-        .catch( error => {
+    let pluginData = await pluginDataFolder.getEntry("pluginData.txt")
+        .catch( async error => {
             const lastUsedURL = "";
             console.log(`Plugin file doesn't exist.: ${error}`);
-            return lastUsedURL;
+            let pluginDataFile = await pluginDataFolder.createFile("pluginData.txt", {overwrite: true});
+            await pluginDataFile.write(lastUsedURL); 
+            return (
+                {
+                    file: pluginDataFile,
+                    url: lastUsedURL,
+                }
+            );
         })
         .then( async file => {
             const lastUsedURL = await file.read();
-            return lastUsedURL;
+            return (
+                {
+                    file: file,
+                    url: lastUsedURL,
+                }
+            );
         })
 
     // return statement of plugin handler (MUST BE A PROMISE!)
-    return showSetupDialog(pluginDataFile)
+    return showSetupDialog(pluginData)
         .then( async function (result) {
             // Capture setup dialog entries
            const dialogEntries = {
                json: result['sheetsuEndpoint'],
            }
-           let pluginData = await pluginDataFolder.createFile("pluginData.txt", {overwrite: true});
-           await pluginData.write(dialogEntries.json); 
+           
+           await pluginData.file.write(dialogEntries.json); 
 
            // Ask user to pick an output folder
            const exportFolder = await fs.getFolder();

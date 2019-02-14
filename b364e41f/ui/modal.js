@@ -1,6 +1,6 @@
 const DialogHelper = require('../utils/dialog-helper');
 
-async function showSetupDialog(url) {
+async function showSetupDialog(data) {
     try {
         const result = await DialogHelper.showDialog('setupDialog', 'Matchup Image Generator', 
         // Dialog contents
@@ -13,7 +13,7 @@ async function showSetupDialog(url) {
                 type: DialogHelper.TEXT_INPUT,
                 id: 'sheetsuEndpoint',
                 label: 'Sheetsu URL',
-                value: `${url}`,
+                value: `${data.url}`,
             },
         ],
         // Dialog options
