@@ -155,7 +155,7 @@ async function checkLogos(jsonResponse) {
         })
     }
     await startCheck(missingLogoURLs);
-    return showMissingAlert(sanitizeList(missingLogoURLs));
+    return missingLogoURLs.length > 0 ? showMissingAlert(sanitizeList(missingLogoURLs)) : console.log("All logos were found.") ;
 
 
     async function checkURL(url, list) {
