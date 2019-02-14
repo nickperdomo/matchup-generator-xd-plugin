@@ -15,29 +15,7 @@ async function myPluginCommand() {
     let missingLogos = [];
 
     // Get the last used Sheetsu URL from the plugin data file
-    const pluginDataFolder = await fs.getDataFolder();
-    let pluginData = await pluginDataFolder.getEntry("pluginData.txt")
-        .catch( async error => {
-            const lastUsedURL = "";
-            console.log(`Plugin file doesn't exist.: ${error}`);
-            let pluginDataFile = await pluginDataFolder.createFile("pluginData.txt", {overwrite: true});
-            await pluginDataFile.write(lastUsedURL); 
-            return (
-                {
-                    file: pluginDataFile,
-                    url: lastUsedURL,
-                }
-            );
-        })
-        .then( async file => {
-            const lastUsedURL = await file.read();
-            return (
-                {
-                    file: file,
-                    url: lastUsedURL,
-                }
-            );
-        })
+    const pluginData = await getPluginData();
 
     // return statement of plugin handler (MUST BE A PROMISE!)
     return showSetupDialog(pluginData)
@@ -154,6 +132,39 @@ async function myPluginCommand() {
 } // plugin command end
     
 
+async function getPluginData() {
+    const pluginDataFilename = "pluginData.txt";
+    const pluginDataFolder = await fs.getDataFolder();
+    const pluginDataFolderEntries = await pluginDataFolder.getEntries();
+    const pluginDataFiles = await pluginDataFolderEntries.filter(entry => entry.isFile);
+    const isPluginDataFile = pluginDataFiles.some( file => file.name === pluginDataFilename);
+    const pluginData = await pluginDataObject();
+    return pluginData;
+
+    async function pluginDataObject () {
+        // console.log(pluginDataFolderEntries.toString())
+        if (isPluginDataFile) {
+            const pluginDataFile = await pluginDataFolder.getEntry(pluginDataFilename);
+            const lastUsedURL = await pluginDataFile.read();
+            return (
+                {
+                    file: pluginDataFile,
+                    url: lastUsedURL,
+                }
+            );
+        } else {
+            const pluginDataFile = await pluginDataFolder.createFile(pluginDataFilename, {overwrite: false});
+            await pluginDataFile.write(""); 
+            const lastUsedURL = await pluginDataFile.read();
+            return (
+                {
+                    file: pluginDataFile,
+                    url: lastUsedURL,
+                }
+            );
+        }
+    };
+}
 
 async function checkLogos(jsonResponse) {
     let missingLogoURLs = [];
