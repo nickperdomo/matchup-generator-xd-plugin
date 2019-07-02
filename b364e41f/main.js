@@ -1,3 +1,6 @@
+/* Created by Nick Perdomo
+ * Questions, praise, hate? Sling it here: nickperdomo121@gmail.com
+ */
 const application = require("application");
 const uxp = require("uxp").storage;
 const fs = uxp.localFileSystem;
@@ -10,25 +13,28 @@ const { showSetupDialog, showMissingAlert } = require("./ui/modal");
 async function myPluginCommand() {
     const { root } = require("scenegraph");
     let missingLogos = [];
+    // Get the last used Sheetsu URL from the plugin data file
+    const pluginDataFolder = await fs.getDataFolder();
+    let pluginDataFile = await pluginDataFolder.getEntry("pluginData.txt")
+        .catch( error => {
+            const lastUsedURL = "";
+            console.log(`Plugin file doesn't exist.: ${error}`);
+            return lastUsedURL;
+        })
+        .then( async file => {
+            const lastUsedURL = await file.read();
+            return lastUsedURL;
+        })
 
-    // Get the last used Sheetsu URL in the current document
-    let lastUsedURL = '';
-    if (root.pluginData !== undefined) {
-        lastUsedURL = root.pluginData.lastUsedURL
-    } else {
-        root.pluginData = {
-            lastUsedURL: lastUsedURL,
-        }
-    }
-
-    // return statement of plugin handler MUST BE A PROMISE!
-    return showSetupDialog(lastUsedURL)
+    // return statement of plugin handler (MUST BE A PROMISE!)
+    return showSetupDialog(pluginDataFile)
         .then( async function (result) {
             // Capture setup dialog entries
-           root.pluginData = {
-               ...root.pluginData,
-               lastUsedURL: result.sheetsuEndpoint,
+           const dialogEntries = {
+               json: result['sheetsuEndpoint'],
            }
+           let pluginData = await pluginDataFolder.createFile("pluginData.txt", {overwrite: true});
+           await pluginData.write(dialogEntries.json);           
 
            // Ask user to pick an output folder
            const exportFolder = await fs.getFolder();
@@ -92,11 +98,11 @@ async function myPluginCommand() {
 
             // Download matchup data JSON
             let sheetsuEndpoint;
-            if (result.sheetsuEndpoint) {
-                sheetsuEndpoint = result.sheetsuEndpoint;
+            if (dialogEntries.json) {
+                sheetsuEndpoint = dialogEntries.json;
             } else {
                 // Default to the NFL custom-export sheet if Sheetsu URL is left empty (useful for testing)
-                sheetsuEndpoint = 'https://sheetsu.com/apis/v1.0su/cf140788914a/sheets/custom-export';
+                sheetsuEndpoint = 'https://sheetsu.com/apis/v1.0su/8c894eb7a43d/sheets/custom-export';
             }
 
             return fetchJSON(sheetsuEndpoint)
@@ -125,9 +131,12 @@ async function myPluginCommand() {
                     }
                     showMissingAlert(sanitizeList(missingLogos));
                     // Revert document to last saved stated (no XD API call exists yet)
-                    // throw new Error('Revert to Saved');
+                    throw new Error('Revert to Saved');
                 })
         })
+        // .catch( reason => {
+        //     console.log(`Error with setup dialog: ${reason}`)
+        // }) // modal end
 } // plugin command end
     
 
