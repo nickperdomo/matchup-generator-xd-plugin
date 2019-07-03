@@ -62,7 +62,7 @@ async function showMissingAlert(missingList) {
         
         return result;
     } catch (e) {
-        throw new Error(`The following logos were missing:\n${missingList}`);
+        console.log(`The following logos were missing:\n${missingList}`);
         // The dialog got canceled by the user.
     }    
 }
