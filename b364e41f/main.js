@@ -272,7 +272,7 @@ async function exportRenditions(data, matchupIndex, homeLogoConts, awayLogoConts
 
             await application.createRenditions(renditions)    
                 .then(results => {                             
-                    console.log(`Renditions have been saved at ${results[0].outputFile.nativePath}`);
+                    console.log(`Exported ${data[matchupIndex].matchupName} matchup set.`);
                 })
                 .catch(error => {                             
                     console.log(error);
