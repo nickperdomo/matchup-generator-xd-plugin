@@ -47,7 +47,6 @@ async function showMissingAlert(missingList) {
         // Dialog options
         {
             okButtonText: 'Shucks',
-            // cancelButtonText: 'Cancel',
         });
         
         return result;
