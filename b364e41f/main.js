@@ -32,17 +32,17 @@ async function myPluginCommand() {
 
            // Ask user to pick an output folder
            const exportFolder = await fs.getFolder();
-           let exportSubfolders = [];
-           let logosFolder,
-               localLogos,
+           let exportSubfolders = [],
+               logosFolder = undefined,
+               localLogos  = [],
                logoOverrides = [];      
            
            // Check if foxnow, fsgo, and logos subfolders exist 
-           const entries = await exportFolder.getEntries();
-           const folderEntries = await entries.filter(entry => entry.isFolder);
-           folderEntries.forEach( folder => {
+           const exportFolderEntries = await exportFolder.getEntries();
+           const exportFolders = await exportFolderEntries.filter(entry => entry.isFolder);
+           exportFolders.forEach( folder => {
                 if (folder.name === 'foxnow' || folder.name === 'fsgo'){
-                    exportSubfolders.push(folder)
+                    exportSubfolders.push(folder);
                 } else if (folder.name === 'logos'){
                     logosFolder = folder;
                 }
@@ -52,7 +52,7 @@ async function myPluginCommand() {
            if (exportSubfolders.length === 0){
                 const foxnowFolder = await exportFolder.createFolder("foxnow");
                 const fsgoFolder = await exportFolder.createFolder("fsgo");
-                exportSubfolders = [foxnowFolder,fsgoFolder]
+                exportSubfolders = [foxnowFolder,fsgoFolder];
            // If only one exists, create the other and add it to the
            // array with foxnow always first in the array
            } else if (exportSubfolders.length < 2){
