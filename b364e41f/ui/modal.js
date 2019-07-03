@@ -43,15 +43,26 @@ async function showMissingAlert(missingList) {
                 id: 'list',
                 label: `${missingList}`,
             },
+            {   
+                type: DialogHelper.TEXT,
+                id: 'listBreak',
+                label: '  ',
+            },
+            {   
+                type: DialogHelper.TEXT,
+                id: 'tip',
+                label: "Continue to begin exporting without the missing logos (wrong logos will appear in those sets) or cancel to add them online or locally.",
+            },
         ],
         // Dialog options
         {
-            okButtonText: 'Shucks',
+            okButtonText: 'Continue',
+            cancelButtonText: 'Cancel',
         });
         
         return result;
     } catch (e) {
-        return console.log(e);
+        throw new Error(`The following logos were missing:\n${missingList}`);
         // The dialog got canceled by the user.
     }    
 }
