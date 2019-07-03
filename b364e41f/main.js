@@ -1,7 +1,7 @@
 const application = require("application");
 const uxp = require("uxp").storage;
 const fs = uxp.localFileSystem;
-const { ImageFill } = require("scenegraph");
+const { ImageFill, Color } = require("scenegraph");
 const { xhrBinary, base64ArrayBuffer } = require("./utils/network");
 const { showSetupDialog, showMissingAlert } = require("./ui/modal");
 
@@ -125,8 +125,9 @@ async function myPluginCommand() {
                     for ( let [matchupIndex,matchup] of matchups.entries() ) {
                         await exportRenditions(matchups, matchupIndex, homeLogoConts, awayLogoConts, exportableAssets, exportSubfolders);
                     }
-                    // Revert document to last saved stated (no XD API call exists yet)
-                    throw new Error('Revert to Saved');
+                    // Reset logo containers to original placeholders
+                    resetPlaceholders(homeLogoConts,'#FD7575')
+                    resetPlaceholders(awayLogoConts,'#75D3FD')
                 })
         })
 } // plugin command end
@@ -226,6 +227,13 @@ async function applyImagefill(logoConts, base64, localImage) {
     logoConts.forEach(container => {
         container.fill = imageFill;
     });
+}
+
+function resetPlaceholders(placeholders, colorHex) {
+    placeholders.forEach( placeholder => {
+        const colorFill = new Color(colorHex, 1)
+        placeholder.fill = colorFill
+    })
 }
 
 async function exportRenditions(data, matchupIndex, homeLogoConts, awayLogoConts, exportableAssets, folders) {
