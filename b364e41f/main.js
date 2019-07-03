@@ -75,7 +75,6 @@ async function myPluginCommand() {
                        name: logo.name,
                        path: logo.nativePath,
                    }
-                //    console.log(override.name);
                    logoOverrides.push(override);
                 });
             }
@@ -116,7 +115,6 @@ async function myPluginCommand() {
                                 }
                             });
                         });
-                        // console.log(matchups);
                     }
                     // Check URLs of non-local logos before processing exportable sets
                     await checkLogos(matchups);
@@ -130,13 +128,13 @@ async function myPluginCommand() {
                     resetPlaceholders(awayLogoConts,'#75D3FD')
                 })
         })
-} // plugin command end
+} // end of plugin command
     
 
 
 async function checkLogos(jsonResponse) {
     let missingLogoURLs = [];
-    let allLogoURLs = jsonResponse
+    const allLogoURLs = jsonResponse
         .map( matchup => [matchup.homeTeamLogoURL, matchup.awayTeamLogoURL])
         .reduce((acc, val) => acc.concat(val), [])
         .filter((item, index, a) => a.indexOf(item) == index);
