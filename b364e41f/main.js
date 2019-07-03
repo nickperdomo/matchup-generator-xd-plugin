@@ -112,15 +112,17 @@ async function myPluginCommand() {
                     if (logoOverrides.length > 0){
                         logoOverrides.forEach(override => {
                             matchups.forEach(matchup => {
-                                if ( typeof matchup.awayTeamLogoURL === 'string' && matchup.awayTeamLogoURL.search("/"+ override.name) !== -1 ){
-                                    matchup.awayTeamLogoURL = override.image;
-                                }
-                                if ( typeof matchup.homeTeamLogoURL === 'string' && matchup.homeTeamLogoURL.search("/"+ override.name) !== -1 ){
-                                    matchup.homeTeamLogoURL = override.image;
-                                }
+                                setLocalOverride(matchup, 'awayTeamLogoURL', override);
+                                setLocalOverride(matchup, 'homeTeamLogoURL', override);
                             });
                         });
                     }
+                    function setLocalOverride(matchup, logoURL, override) {
+                        if ( typeof matchup[logoURL] === 'string' && matchup[logoURL].search("/"+ override.name) !== -1 ){
+                            matchup[logoURL] = override.image;
+                        }
+                    }
+
                     // Check URLs of non-local logos before processing exportable sets
                     await checkLogos(matchups);
 
